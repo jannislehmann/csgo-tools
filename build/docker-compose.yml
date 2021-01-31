@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  apiclient:
+    image: cludch/csgo-tools:latest
+    container_name: apiclient
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes: 
+      - ./demos:/demos
+      - ./config:/config
+
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRES_USER: csgo
+      POSTGRES_DB: csgo
+    env_file: docker.env

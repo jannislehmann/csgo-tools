@@ -1,0 +1,7 @@
+# Storage
+configs/config.json
+configs/db.sqlite
+demos/*
+
+bin/
+build/docker.env

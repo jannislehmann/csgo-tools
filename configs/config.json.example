@@ -1,0 +1,24 @@
+{
+    "steam": {
+        "username": "secret",
+        "password": "superSecret",
+        "twoFactorSecret": "superDuperSecret",
+        "apiKey": "private"
+    },
+    "csgo": [ 
+        {
+            "matchHistoryAuthenticationCode": "xyz",
+            "knownMatchCode": "CSGO-abcde-efghi-jklmn-opqrs-tuvwx",
+            "steamId": "76561198185324675"
+        }
+    ],
+    "database": {
+        "host": "localhost",
+        "port": "5432",
+        "username": "csgo",
+        "password": "secret",
+        "database": "csgo"
+    },
+    "demosDir": "/home/csgo/demos/",
+    "debug": "false"
+}
