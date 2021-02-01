@@ -4,4 +4,4 @@ configs/db.sqlite
 demos/*
 
 bin/
-build/docker.env
+docker.env

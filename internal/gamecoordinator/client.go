@@ -5,7 +5,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Cludch/csgo-tools/internal/pkg/gamecoordinator/protocol"
+	"github.com/Cludch/csgo-tools/internal/gamecoordinator/protocol"
 	"github.com/Philipp15b/go-steam"
 	"github.com/Philipp15b/go-steam/protocol/gamecoordinator"
 	"github.com/golang/protobuf/proto" //nolint //thinks break if we use the new package

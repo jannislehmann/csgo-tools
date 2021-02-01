@@ -3,9 +3,9 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Cludch/csgo-tools/internal/pkg/database"
-	"github.com/Cludch/csgo-tools/internal/pkg/gamecoordinator"
-	"github.com/Cludch/csgo-tools/pkg/config"
+	"github.com/Cludch/csgo-tools/internal/config"
+	"github.com/Cludch/csgo-tools/internal/entity"
+	"github.com/Cludch/csgo-tools/internal/gamecoordinator"
 	"github.com/Cludch/csgo-tools/pkg/demo"
 	"github.com/Philipp15b/go-steam"
 	"github.com/Philipp15b/go-steam/protocol/steamlang"
@@ -36,14 +36,14 @@ func init() {
 		DisableColors: false,
 	})
 
-	db = database.GetDatabase()
+	db = entity.GetDatabase()
 	gamecoordinator.DB = db
 }
 
 func main() {
 	demos := demo.ScanDemosDir(config.GetConfiguration().DemosDir)
 	for _, matchID := range demos {
-		database.CreateDownloadedMatchFromMatchID(matchID)
+		entity.CreateDownloadedMatchFromMatchID(matchID)
 	}
 
 	totpInstance := totp.NewTotp(configData.Steam.TwoFactorSecret)

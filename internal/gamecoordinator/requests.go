@@ -1,8 +1,8 @@
 package gamecoordinator
 
 import (
-	"github.com/Cludch/csgo-tools/internal/pkg/database"
-	"github.com/Cludch/csgo-tools/internal/pkg/gamecoordinator/protocol"
+	"github.com/Cludch/csgo-tools/internal/entity"
+	"github.com/Cludch/csgo-tools/internal/gamecoordinator/protocol"
 	"github.com/golang/protobuf/proto" //nolint //thinks break if we use the new package
 )
 
@@ -17,7 +17,7 @@ func (c *CS) GetRecentGames() {
 // RequestMatch requests the match information for a share code
 func (c *CS) RequestMatch(shareCode string) {
 	// Decode share code
-	sc := database.DecodeShareCode(shareCode)
+	sc := entity.DecodeShareCode(shareCode)
 	if sc == nil {
 		return
 	}

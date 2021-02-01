@@ -1,0 +1,9 @@
+/configs/
+/demos
+.dockerignore
+.idea
+.DS_Store
+*.db
+*.db-journal
+Dockerfile
+docker-compose*

@@ -5,8 +5,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Cludch/csgo-tools/internal/pkg/database"
-	"github.com/Cludch/csgo-tools/pkg/config"
+	"github.com/Cludch/csgo-tools/internal/config"
+	"github.com/Cludch/csgo-tools/internal/entity"
 	"github.com/Cludch/csgo-tools/pkg/valveapi"
 	"gorm.io/gorm"
 )
@@ -16,7 +16,7 @@ var db *gorm.DB
 
 // Sets up the global variables (config, db) and the logger
 func init() {
-	db = database.GetDatabase()
+	db = entity.GetDatabase()
 	configData = config.GetConfiguration()
 
 	if configData.Debug == "true" {
@@ -32,7 +32,7 @@ func init() {
 }
 
 func main() {
-	var nonDownloadedMatches []database.Match
+	var nonDownloadedMatches []entity.Match
 
 	// Create a loop that checks for new download urls
 	t := time.NewTicker(time.Minute)

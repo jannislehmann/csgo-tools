@@ -5,8 +5,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Cludch/csgo-tools/internal/pkg/database"
-	"github.com/Cludch/csgo-tools/pkg/config"
+	"github.com/Cludch/csgo-tools/internal/config"
+	"github.com/Cludch/csgo-tools/internal/entity"
 	"github.com/Cludch/csgo-tools/pkg/valveapi"
 	"gorm.io/gorm"
 )
@@ -16,7 +16,7 @@ var db *gorm.DB
 
 // Sets up the global variables (config, db) and the logger
 func init() {
-	db = database.GetDatabase()
+	db = entity.GetDatabase()
 	configData = config.GetConfiguration()
 
 	if configData.Debug == "true" {
@@ -34,9 +34,9 @@ func init() {
 func main() {
 	// Add accounts from config to database if not existing
 	// This also adds the first known share code
-	database.AddConfigUsers(configData.CSGO)
+	entity.AddConfigUsers(configData.CSGO)
 
-	var csgoUsers []database.CSGOUser
+	var csgoUsers []entity.CSGOUser
 
 	// Create a loop that checks for new share codes each minute
 	t := time.NewTicker(time.Minute)
@@ -72,9 +72,9 @@ func main() {
 			log.Infof("found match share code %v", shareCode)
 
 			// Create share code
-			sc := database.CreateShareCodeFromEncoded(shareCode)
+			sc := entity.CreateShareCodeFromEncoded(shareCode)
 			// Create match
-			database.CreateMatch(sc)
+			entity.CreateMatch(sc)
 			// Update csgo user
 			csgoUser.UpdateLatestShareCode(sc)
 		}

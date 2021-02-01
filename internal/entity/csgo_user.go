@@ -1,12 +1,12 @@
-package database
+package entity
 
 import (
 	"strconv"
 	"time"
 
+	"github.com/Cludch/csgo-tools/internal/config"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Cludch/csgo-tools/pkg/config"
 	"gorm.io/gorm"
 )
 

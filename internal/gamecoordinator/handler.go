@@ -6,8 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"github.com/Cludch/csgo-tools/internal/pkg/database"
-	"github.com/Cludch/csgo-tools/internal/pkg/gamecoordinator/protocol"
+	"github.com/Cludch/csgo-tools/internal/entity"
+	"github.com/Cludch/csgo-tools/internal/gamecoordinator/protocol"
 	"github.com/Philipp15b/go-steam/protocol/gamecoordinator"
 )
 
@@ -30,7 +30,7 @@ func (c *CS) HandleMatchList(packet *gamecoordinator.GCPacket) error {
 			matchID := match.GetMatchid()
 			url := round.GetMap()
 
-			var match database.Match
+			var match entity.Match
 			DB.Find(&match, "match_id = ?", matchID)
 
 			match.MatchTime = time.Unix(int64(matchTime), 0)
@@ -48,7 +48,7 @@ func (c *CS) HandleGCReady(e *GCReadyEvent) {
 	c.GetRecentGames()
 
 	// Request demos for non-processed share codes from the database
-	var matches []database.Match
+	var matches []entity.Match
 	t := time.NewTicker(time.Minute * 5)
 	for {
 		result := DB.Preload("ShareCode").Find(&matches, "download_url = '' AND downloaded = false")
