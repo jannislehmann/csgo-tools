@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -48,6 +49,7 @@ func main() {
 		for _, match := range nonDownloadedMatches {
 			// Download match
 			err := valveapi.DownloadDemo(match.DownloadURL, configData.DemosDir, match.MatchTime)
+			fileName := path.Base(match.DownloadURL)
 			if err != nil {
 				if os.IsTimeout(err) {
 					log.Error("Lost connection", err)
@@ -56,8 +58,8 @@ func main() {
 				log.Error(err)
 			}
 
-			// Mark as downloaded
-			db.Model(&match).Update("Downloaded", true)
+			// Mark as downloaded and save file name
+			db.Model(&match).Updates(entity.Match{Filename: fileName, Downloaded: true})
 		}
 		<-t.C
 	}

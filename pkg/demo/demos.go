@@ -8,9 +8,15 @@ import (
 	"strings"
 )
 
+// File holds information about a single demo file consisting of the match id and the file name.
+type File struct {
+	MatchID  uint64
+	Filename string
+}
+
 // ScanDemosDir scans the demos dir and returns all match ids.
-func ScanDemosDir(path string) []uint64 {
-	var demos []uint64
+func ScanDemosDir(path string) []File {
+	var demos []File
 
 	err := filepath.Walk(path,
 		func(path string, info os.FileInfo, err error) error {
@@ -27,13 +33,13 @@ func ScanDemosDir(path string) []uint64 {
 				return nil
 			}
 
-			filename := info.Name()
-			demoName := strings.TrimSuffix(filename, filepath.Ext(filename))
+			fileName := info.Name()
+			demoName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
 
 			matchID := getIDFromFileName(demoName)
 
 			if matchID != 0 {
-				demos = append(demos, matchID)
+				demos = append(demos, File{MatchID: matchID, Filename: fileName})
 			}
 
 			return nil

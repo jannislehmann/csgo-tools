@@ -42,7 +42,7 @@ func main() {
 	// Create a loop that checks for new share codes each minute
 	t := time.NewTicker(time.Minute)
 	for {
-		result := db.Preload("ShareCode").Find(&csgoUsers)
+		result := db.Preload("ShareCode").Find(&csgoUsers, "match_history_authentication_code != ''")
 
 		if err := result.Error; err != nil {
 			panic(err)

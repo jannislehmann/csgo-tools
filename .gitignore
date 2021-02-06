@@ -5,3 +5,5 @@ demos/*
 
 bin/
 docker.env
+
+.DS_STORE
