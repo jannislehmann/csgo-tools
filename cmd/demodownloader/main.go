@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -48,6 +49,10 @@ func main() {
 			// Download match
 			err := valveapi.DownloadDemo(match.DownloadURL, configData.DemosDir, match.MatchTime)
 			if err != nil {
+				if os.IsTimeout(err) {
+					log.Error("Lost connection", err)
+					continue
+				}
 				log.Error(err)
 			}
 

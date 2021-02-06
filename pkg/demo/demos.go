@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// ScanDemosDir scans the demos dir and adds all match ids to the database.
+// ScanDemosDir scans the demos dir and returns all match ids.
 func ScanDemosDir(path string) []uint64 {
 	var demos []uint64
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -56,8 +57,12 @@ func main() {
 			steamID := csgoUser.SteamID
 			shareCode, err := valveapi.GetNextMatch(configData.Steam.SteamAPIKey, steamID, csgoUser.MatchHistoryAuthenticationCode, csgoUser.ShareCode.Encoded)
 
-			// Disable user
+			// Disable user on error
 			if err != nil {
+				if os.IsTimeout(err) {
+					log.Error("Lost connection", err)
+					continue
+				}
 				db.Model(&csgoUser).Update("Disabled", true)
 				log.Warnf("disabled csgo user %d due to an error in fetching the share code", steamID)
 				log.Error(err)
