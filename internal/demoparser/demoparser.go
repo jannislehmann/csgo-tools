@@ -20,12 +20,12 @@ var ConfigData *config.Config
 
 // DemoParser holds the instance of one demo consisting of the file handle and the parsed data.
 type DemoParser struct {
-	parser       demoinfocs.Parser
-	Match        *MatchData
-	CurrentRound int
-	RoundStart   time.Duration
-	RoundOngoing bool
-	IsFirstHalf  bool
+	parser        demoinfocs.Parser
+	Match         *MatchData
+	CurrentRound  int
+	RoundStart    time.Duration
+	RoundOngoing  bool
+	SidesSwitched bool
 }
 
 // MatchData holds information about the match itself.
@@ -40,18 +40,21 @@ type MatchData struct {
 	Rounds   []*Round
 }
 
+// Team represents a team and links to it's players.
 type Team struct {
 	State     *common.TeamState
 	Players   []*Player
 	StartedAs common.Team
 }
 
+// Player represents one player either as T or CT.
 type Player struct {
 	SteamID uint64
 	Name    string
 	Team    *Team
 }
 
+// Round contains information about one round.
 type Round struct {
 	Duration  time.Duration
 	Kills     []*Kill
@@ -70,6 +73,7 @@ type Kill struct {
 	Weapon     common.EquipmentType
 }
 
+// Parse takes a demo file and starts parsing by registering all required event handlers.
 func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
 	p.Match = &MatchData{ID: demoFile.MatchID}
 
@@ -108,4 +112,22 @@ func (p *DemoParser) getPlayer(player *common.Player) (*Player, error) {
 	}
 
 	return nil, errors.New("Player not found in local match struct " + strconv.FormatUint(player.SteamID64, 10))
+}
+
+// GetTeamIndex returns 0 for T, 1 for CT and 2 for everything else.
+func GetTeamIndex(team common.Team, sidesSwitched bool) uint8 {
+	if team == common.TeamTerrorists {
+		if !sidesSwitched {
+			return 0
+		}
+		return 1
+	} else if team == common.TeamCounterTerrorists {
+		if !sidesSwitched {
+			return 1
+		}
+		return 0
+	}
+
+	// Could also return an error here but we do not expect this to happen.
+	return 2
 }

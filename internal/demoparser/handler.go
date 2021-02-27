@@ -12,7 +12,7 @@ import (
 // Inits the players and teams.
 func (p *DemoParser) handleMatchStart(events.MatchStart) {
 	p.Match.Map = p.Match.Header.MapName
-	p.IsFirstHalf = true
+	p.SidesSwitched = false
 
 	if ConfigData.IsDebug() {
 		p.debug(fmt.Sprintf("Game started on map %v", p.Match.Map))
@@ -27,8 +27,8 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 	p.Match.Teams = make(map[uint8]*(Team), 2)
 	teams := p.Match.Teams
 
-	teams[GetTeamIndex(ct.Team())] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
-	teams[GetTeamIndex(t.Team())] = &Team{State: t, StartedAs: common.TeamTerrorists}
+	teams[GetTeamIndex(ct.Team(), p.SidesSwitched)] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
+	teams[GetTeamIndex(t.Team(), p.SidesSwitched)] = &Team{State: t, StartedAs: common.TeamTerrorists}
 
 	// Create players and map them to the teams.
 	for _, player := range gameState.Participants().Playing() {
@@ -36,7 +36,7 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 			continue
 		}
 
-		teamID := GetTeamIndex(player.Team)
+		teamID := GetTeamIndex(player.Team, p.SidesSwitched)
 		teamPlayers := p.Match.Teams[teamID].Players
 
 		customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
@@ -49,9 +49,9 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 func (p *DemoParser) handleGamePhaseChanged(e events.GamePhaseChanged) {
 	switch e.NewGamePhase {
 	case common.GamePhaseInit:
-		p.IsFirstHalf = true
+		p.SidesSwitched = false
 	case common.GamePhaseTeamSideSwitch:
-		p.IsFirstHalf = false
+		p.SidesSwitched = !p.SidesSwitched
 	case common.GamePhaseGameEnded:
 		p.Match.Duration = p.parser.CurrentTime()
 	}
@@ -82,6 +82,10 @@ func (p *DemoParser) handleMVP(e events.RoundMVPAnnouncement) {
 }
 
 func (p *DemoParser) handleRoundEnd(e events.RoundEnd) {
+	if !p.RoundOngoing {
+		return
+	}
+
 	p.RoundOngoing = false
 	round := p.Match.Rounds[p.CurrentRound-1]
 
@@ -89,7 +93,7 @@ func (p *DemoParser) handleRoundEnd(e events.RoundEnd) {
 		p.debug(fmt.Sprintf("Ending round %d with winner %v", p.CurrentRound, e.Message))
 	}
 
-	round.Winner = p.Match.Teams[GetTeamIndex(e.WinnerState.Team())]
+	round.Winner = p.Match.Teams[GetTeamIndex(e.Winner, p.SidesSwitched)]
 	round.WinReason = e.Reason
 	round.Duration = p.RoundStart - p.parser.CurrentTime()
 }
@@ -102,6 +106,7 @@ func (p *DemoParser) handleKill(e events.Kill) {
 
 	victim, err := p.getPlayer(e.Victim)
 	if err != nil {
+		// TODO: This happens -> Either the victim disconnected or there is no victim? The steam id is not found in the structs.
 		log.Panic(err)
 	}
 
