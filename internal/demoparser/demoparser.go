@@ -18,8 +18,6 @@ import (
 // ConfigData holds the configuration instance for the package.
 var ConfigData *config.Config
 
-// https://github.com/megaclan3000/megaclan3000/blob/master/internal/demoparser/parser.go
-
 // DemoParser holds the instance of one demo consisting of the file handle and the parsed data.
 type DemoParser struct {
 	parser       demoinfocs.Parser
