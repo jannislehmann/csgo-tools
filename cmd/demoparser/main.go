@@ -50,7 +50,15 @@ func main() {
 			}
 			parser := &demoparser.DemoParser{}
 			demoFile := &demo.File{MatchID: match.MatchID, MatchTime: match.CreatedAt, Filename: fileName}
-			parser.Parse(configData.DemosDir, demoFile)
+			err := parser.Parse(configData.DemosDir, demoFile)
+
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+
+			result := parser.Match.Process()
+			result.Print()
 		}
 
 		<-t.C
