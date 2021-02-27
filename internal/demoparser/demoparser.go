@@ -33,7 +33,7 @@ type MatchData struct {
 	ID       uint64
 	Map      string
 	Header   *common.DemoHeader
-	Teams    map[int]*Team
+	Teams    map[uint8]*Team
 	Players  []*Player
 	Duration time.Duration
 	Time     time.Time

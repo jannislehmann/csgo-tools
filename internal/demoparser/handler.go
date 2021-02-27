@@ -24,11 +24,11 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 	ct := gameState.TeamCounterTerrorists()
 	t := gameState.TeamTerrorists()
 
-	p.Match.Teams = make(map[int]*(Team), 2)
+	p.Match.Teams = make(map[uint8]*(Team), 2)
 	teams := p.Match.Teams
 
-	teams[ct.ID()] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
-	teams[t.ID()] = &Team{State: t, StartedAs: common.TeamTerrorists}
+	teams[GetTeamIndex(ct.Team())] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
+	teams[GetTeamIndex(t.Team())] = &Team{State: t, StartedAs: common.TeamTerrorists}
 
 	// Create players and map them to the teams.
 	for _, player := range gameState.Participants().Playing() {
@@ -36,7 +36,7 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 			continue
 		}
 
-		teamID := player.TeamState.ID()
+		teamID := GetTeamIndex(player.Team)
 		teamPlayers := p.Match.Teams[teamID].Players
 
 		customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
@@ -89,7 +89,7 @@ func (p *DemoParser) handleRoundEnd(e events.RoundEnd) {
 		p.debug(fmt.Sprintf("Ending round %d with winner %v", p.CurrentRound, e.Message))
 	}
 
-	round.Winner = p.Match.Teams[e.WinnerState.ID()]
+	round.Winner = p.Match.Teams[GetTeamIndex(e.WinnerState.Team())]
 	round.WinReason = e.Reason
 	round.Duration = p.RoundStart - p.parser.CurrentTime()
 }
@@ -100,19 +100,23 @@ func (p *DemoParser) handleKill(e events.Kill) {
 		return
 	}
 
-	killer, err := p.getPlayer(e.Killer)
-	if err != nil {
-		log.Panic(err)
-	}
-
 	victim, err := p.getPlayer(e.Victim)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	round := p.Match.Rounds[p.CurrentRound-1]
-	kill := &Kill{Time: p.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot, Killer: killer, Victim: victim}
+	kill := &Kill{Time: p.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot, Victim: victim}
 	round.Kills = append(round.Kills, kill)
+
+	// Add optional killer if player died e.g. through fall damage
+	if e.Killer != nil {
+		killer, err := p.getPlayer(e.Killer)
+		if err != nil {
+			log.Panic(err)
+		}
+		kill.Killer = killer
+	}
 
 	// Add optional assister
 	if e.Assister != nil {
