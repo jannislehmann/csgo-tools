@@ -53,7 +53,7 @@ func main() {
 				continue
 			}
 			parser := &demoparser.DemoParser{}
-			demoFile := &demo.File{MatchID: match.MatchID, Filename: fileName}
+			demoFile := &demo.File{MatchID: match.MatchID, MatchTime: match.CreatedAt, Filename: fileName}
 			parser.Parse(configData.DemosDir, demoFile)
 		}
 

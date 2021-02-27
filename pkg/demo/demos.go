@@ -6,17 +6,21 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
-// File holds information about a single demo file consisting of the match id and the file name.
+// File holds meta information about one demo file.
 type File struct {
-	MatchID  uint64
-	Filename string
+	MatchID   uint64
+	MatchTime time.Time
+	Filename  string
 }
 
 // ScanDemosDir scans the demos dir and returns all match ids.
-func ScanDemosDir(path string) []File {
-	var demos []File
+func ScanDemosDir(path string) []*File {
+	var demos []*File
 
 	err := filepath.Walk(path,
 		func(path string, info os.FileInfo, err error) error {
@@ -39,7 +43,18 @@ func ScanDemosDir(path string) []File {
 			matchID := getIDFromFileName(demoName)
 
 			if matchID != 0 {
-				demos = append(demos, File{MatchID: matchID, Filename: fileName})
+				// Get file creation date.
+				modTime := time.Now()
+
+				stats, err := os.Stat(path)
+				if err != nil {
+					log.Errorf("Unable to read file stats for %v", fileName)
+				} else {
+					modTime = stats.ModTime()
+				}
+
+				// Add demo
+				demos = append(demos, &File{MatchID: matchID, MatchTime: modTime, Filename: fileName})
 			}
 
 			return nil

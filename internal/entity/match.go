@@ -28,8 +28,8 @@ func CreateMatch(shareCode *ShareCode) *Match {
 }
 
 // CreateDownloadedMatchFromMatchID creates a match in the database. The match will be marked as downloaded.
-func CreateDownloadedMatchFromMatchID(matchID uint64, fileName string) *Match {
-	match := &Match{MatchID: matchID, Filename: fileName, Downloaded: true}
+func CreateDownloadedMatchFromMatchID(matchID uint64, fileName string, matchDate time.Time) *Match {
+	match := &Match{MatchID: matchID, Filename: fileName, Downloaded: true, MatchTime: matchDate}
 	db.FirstOrCreate(match)
 	return match
 }

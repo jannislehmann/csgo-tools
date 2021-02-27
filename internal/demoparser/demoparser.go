@@ -38,6 +38,7 @@ type MatchData struct {
 	Teams    map[int]*Team
 	Players  []*Player
 	Duration time.Duration
+	Time     time.Time
 	Rounds   []*Round
 }
 

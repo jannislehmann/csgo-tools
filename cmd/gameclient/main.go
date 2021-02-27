@@ -43,7 +43,7 @@ func init() {
 func main() {
 	demos := demo.ScanDemosDir(config.GetConfiguration().DemosDir)
 	for _, match := range demos {
-		entity.CreateDownloadedMatchFromMatchID(match.MatchID, match.Filename)
+		entity.CreateDownloadedMatchFromMatchID(match.MatchID, match.Filename, match.MatchTime)
 	}
 
 	totpInstance := totp.NewTotp(configData.Steam.TwoFactorSecret)
