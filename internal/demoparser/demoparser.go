@@ -32,17 +32,17 @@ type DemoParser struct {
 
 // MatchData holds information about the match itself.
 type MatchData struct {
-	ID            uint64
-	Map           string
-	Header        *common.DemoHeader
-	Teams         map[int]*Team
-	Players       []*Player
-	MatchDuration time.Duration
-	Rounds        []*Round
+	ID       uint64
+	Map      string
+	Header   *common.DemoHeader
+	Teams    map[int]*Team
+	Players  []*Player
+	Duration time.Duration
+	Rounds   []*Round
 }
 
 type Team struct {
-	TeamState *common.TeamState
+	State     *common.TeamState
 	Players   []*Player
 	StartedAs common.Team
 }

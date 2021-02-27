@@ -27,8 +27,8 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 	p.Match.Teams = make(map[int]*(Team), 2)
 	teams := p.Match.Teams
 
-	teams[ct.ID()] = &Team{TeamState: ct, StartedAs: common.TeamCounterTerrorists}
-	teams[t.ID()] = &Team{TeamState: t, StartedAs: common.TeamTerrorists}
+	teams[ct.ID()] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
+	teams[t.ID()] = &Team{State: t, StartedAs: common.TeamTerrorists}
 
 	// Create players and map them to the teams.
 	for _, player := range gameState.Participants().Playing() {
@@ -53,7 +53,7 @@ func (p *DemoParser) handleGamePhaseChanged(e events.GamePhaseChanged) {
 	case common.GamePhaseTeamSideSwitch:
 		p.IsFirstHalf = false
 	case common.GamePhaseGameEnded:
-		p.Match.MatchDuration = p.parser.CurrentTime()
+		p.Match.Duration = p.parser.CurrentTime()
 	}
 }
 
