@@ -63,6 +63,17 @@ func GetConfiguration() *Config {
 	return &config
 }
 
+// SetLoggingLevel sets the logging level in relation to the level set in the config file.
+func (c *Config) SetLoggingLevel() {
+	if c.IsTrace() {
+		log.SetLevel(log.TraceLevel)
+	} else if c.IsDebug() {
+		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
+}
+
 // IsDebug returns whether the application is in debug mode.
 func (c *Config) IsDebug() bool {
 	return config.Debug == "true" || config.IsTrace()

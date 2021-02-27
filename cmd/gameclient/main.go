@@ -25,11 +25,7 @@ func init() {
 		log.Error(err)
 	}
 
-	if configData.IsDebug() {
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetLevel(log.InfoLevel)
-	}
+	configData.SetLoggingLevel()
 
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,

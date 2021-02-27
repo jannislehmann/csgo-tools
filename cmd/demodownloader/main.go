@@ -21,11 +21,7 @@ func init() {
 	db = entity.GetDatabase()
 	configData = config.GetConfiguration()
 
-	if configData.IsDebug() {
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetLevel(log.InfoLevel)
-	}
+	configData.SetLoggingLevel()
 
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
