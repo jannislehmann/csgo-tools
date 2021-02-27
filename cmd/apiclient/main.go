@@ -20,7 +20,7 @@ func init() {
 	db = entity.GetDatabase()
 	configData = config.GetConfiguration()
 
-	if configData.Debug == "true" {
+	if configData.IsDebug() {
 		log.SetLevel(log.DebugLevel)
 	} else {
 		log.SetLevel(log.InfoLevel)
@@ -71,6 +71,7 @@ func main() {
 
 			// No new match
 			if shareCode == "" {
+				log.Debugf("no new match found for %d", steamID)
 				continue
 			}
 

@@ -25,7 +25,7 @@ func init() {
 		log.Error(err)
 	}
 
-	if configData.Debug == "true" {
+	if configData.IsDebug() {
 		log.SetLevel(log.DebugLevel)
 	} else {
 		log.SetLevel(log.InfoLevel)
