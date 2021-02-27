@@ -65,7 +65,7 @@ func GetConfiguration() *Config {
 
 // IsDebug returns whether the application is in debug mode.
 func (c *Config) IsDebug() bool {
-	return config.Debug == "true"
+	return config.Debug == "true" || config.IsTrace()
 }
 
 // IsTrace returns whether the application should do extended debugging.
