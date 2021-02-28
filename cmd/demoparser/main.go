@@ -58,7 +58,9 @@ func main() {
 			}
 
 			result := parser.Match.Process()
-			result.Print()
+			if configData.IsDebug() {
+				result.Print()
+			}
 		}
 
 		<-t.C
