@@ -57,10 +57,8 @@ func main() {
 				continue
 			}
 
-			result := parser.Match.Process()
-			if configData.IsDebug() {
-				result.Print()
-			}
+			// TODO: Persist
+			// TODO: Set demo as parsed / parsed with version
 		}
 
 		<-t.C
