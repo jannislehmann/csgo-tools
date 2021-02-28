@@ -57,8 +57,9 @@ func main() {
 				continue
 			}
 
-			// TODO: Persist
-			// TODO: Set demo as parsed / parsed with version
+			if !configData.IsDebug() {
+				db.Model(&match).Update("Disabled", true)
+			}
 		}
 
 		<-t.C
