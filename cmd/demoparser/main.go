@@ -58,7 +58,7 @@ func main() {
 			}
 
 			if !configData.IsDebug() {
-				db.Model(&match).Update("Disabled", true)
+				db.Model(&match).Update("Parsed", true)
 			}
 		}
 

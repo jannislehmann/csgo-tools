@@ -15,7 +15,7 @@ import (
 var configData *config.Config
 var db *gorm.DB
 
-// Sets up the global variables (config, db) and the logger
+// Sets up the global variables (config, db) and the logger.
 func init() {
 	db = entity.GetDatabase()
 	configData = config.GetConfiguration()
@@ -29,13 +29,13 @@ func init() {
 }
 
 func main() {
-	// Add accounts from config to database if not existing
-	// This also adds the first known share code
+	// Add accounts from config to database if not existing.
+	// This also adds the first known share code.
 	entity.AddConfigUsers(configData.CSGO)
 
 	var csgoUsers []entity.CSGOUser
 
-	// Create a loop that checks for new share codes each minute
+	// Create a loop that checks for new share codes each minute.
 	t := time.NewTicker(time.Minute)
 	for {
 		result := db.Preload("ShareCode").Find(&csgoUsers, "match_history_authentication_code != ''")
@@ -44,7 +44,7 @@ func main() {
 			panic(err)
 		}
 
-		// Iterate all csgo users and request the next share code for the latest share code
+		// Iterate all csgo users and request the next share code for the latest share code.
 		for _, csgoUser := range csgoUsers {
 			if csgoUser.Disabled {
 				continue
@@ -65,7 +65,7 @@ func main() {
 				continue
 			}
 
-			// No new match
+			// No new match.
 			if shareCode == "" {
 				log.Debugf("no new match found for %d", steamID)
 				continue
@@ -73,11 +73,11 @@ func main() {
 
 			log.Infof("found match share code %v", shareCode)
 
-			// Create share code
+			// Create share code.
 			sc := entity.CreateShareCodeFromEncoded(shareCode)
-			// Create match
+			// Create match.
 			entity.CreateMatch(sc)
-			// Update csgo user
+			// Update csgo user.
 			csgoUser.UpdateLatestShareCode(sc)
 		}
 		<-t.C

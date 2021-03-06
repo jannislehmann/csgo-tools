@@ -23,13 +23,13 @@ func init() {
 
 	db = conn
 
-	// Create / migrate tables
+	// Create / migrate tables.
 	db.AutoMigrate(&ShareCode{}) //nolint
 	db.AutoMigrate(&CSGOUser{})  //nolint
 	db.AutoMigrate(&Match{})     //nolint
 }
 
-// GetDatabase returns a database connection
+// GetDatabase returns a database connection.
 func GetDatabase() *gorm.DB {
 	return db
 }
