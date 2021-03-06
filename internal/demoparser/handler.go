@@ -24,11 +24,10 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 	ct := gameState.TeamCounterTerrorists()
 	t := gameState.TeamTerrorists()
 
-	p.Match.Teams = make(map[uint8]*(Team), 2)
 	teams := p.Match.Teams
 
-	teams[GetTeamIndex(ct.Team(), p.SidesSwitched)] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
 	teams[GetTeamIndex(t.Team(), p.SidesSwitched)] = &Team{State: t, StartedAs: common.TeamTerrorists}
+	teams[GetTeamIndex(ct.Team(), p.SidesSwitched)] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
 
 	// Create players and map them to the teams.
 	for _, player := range gameState.Participants().Playing() {
@@ -41,7 +40,6 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 
 		customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
 
-		p.Match.Players = append(p.Match.Players, customPlayer)
 		teamPlayers = append(teamPlayers, customPlayer)
 	}
 }
@@ -107,6 +105,7 @@ func (p *DemoParser) handleKill(e events.Kill) {
 	victim, err := p.getPlayer(e.Victim)
 	if err != nil {
 		// TODO: This happens -> Either the victim disconnected or there is no victim? The steam id is not found in the structs.
+		// Create issue
 		log.Panic(err)
 	}
 

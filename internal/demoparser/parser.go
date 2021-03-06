@@ -22,7 +22,7 @@ var ConfigData *config.Config
 type DemoParser struct {
 	parser        demoinfocs.Parser
 	Match         *MatchData
-	CurrentRound  int
+	CurrentRound  byte
 	RoundStart    time.Duration
 	RoundOngoing  bool
 	SidesSwitched bool
@@ -30,21 +30,21 @@ type DemoParser struct {
 
 // MatchData holds information about the match itself.
 type MatchData struct {
-	ID       uint64
-	Map      string
-	Header   *common.DemoHeader
-	Teams    map[uint8]*Team
-	Players  []*Player
-	Duration time.Duration
-	Time     time.Time
-	Rounds   []*Round
+	ID            uint64
+	Map           string
+	Header        *common.DemoHeader
+	Teams         [2]*Team
+	Duration      time.Duration
+	Time          time.Time
+	Rounds        []*Round
+	ParserVersion byte
 }
 
 // Team represents a team and links to it's players.
 type Team struct {
+	StartedAs common.Team
 	State     *common.TeamState
 	Players   []*Player
-	StartedAs common.Team
 }
 
 // Player represents one player either as T or CT.
@@ -92,6 +92,7 @@ func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
 	// Parsing the header within an event handler crashes.
 	header, err := p.parser.ParseHeader()
 	p.Match.Header = &header
+	p.Match.ParserVersion = 1
 
 	// Register all handler
 	p.parser.RegisterEventHandler(p.handleMatchStart)
@@ -105,7 +106,8 @@ func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
 }
 
 func (p *DemoParser) getPlayer(player *common.Player) (*Player, error) {
-	for _, localPlayer := range p.Match.Players {
+	players := append(p.Match.Teams[0].Players, p.Match.Teams[1].Players...)
+	for _, localPlayer := range players {
 		if player.SteamID64 == localPlayer.SteamID {
 			return localPlayer, nil
 		}
@@ -115,7 +117,7 @@ func (p *DemoParser) getPlayer(player *common.Player) (*Player, error) {
 }
 
 // GetTeamIndex returns 0 for T, 1 for CT and 2 for everything else.
-func GetTeamIndex(team common.Team, sidesSwitched bool) uint8 {
+func GetTeamIndex(team common.Team, sidesSwitched bool) byte {
 	if team == common.TeamTerrorists {
 		if !sidesSwitched {
 			return 0
