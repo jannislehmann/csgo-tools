@@ -11,7 +11,7 @@ type Match struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	MatchID     uint64         `gorm:"primaryKey"`
+	ID          uint64         `gorm:"primaryKey"`
 	ShareCode   ShareCode
 	Filename    string
 	MatchTime   time.Time
@@ -22,14 +22,14 @@ type Match struct {
 
 // CreateMatch creates a match in the database. The match will be downloaded later.
 func CreateMatch(shareCode *ShareCode) *Match {
-	match := &Match{MatchID: shareCode.MatchID, ShareCode: *shareCode}
+	match := &Match{ID: shareCode.MatchID, ShareCode: *shareCode}
 	db.FirstOrCreate(match)
 	return match
 }
 
 // CreateDownloadedMatchFromMatchID creates a match in the database. The match will be marked as downloaded.
 func CreateDownloadedMatchFromMatchID(matchID uint64, fileName string, matchDate time.Time) *Match {
-	match := &Match{MatchID: matchID, Filename: fileName, Downloaded: true, MatchTime: matchDate}
+	match := &Match{ID: matchID, Filename: fileName, Downloaded: true, MatchTime: matchDate}
 	db.FirstOrCreate(match)
 	return match
 }
