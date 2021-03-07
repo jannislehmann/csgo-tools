@@ -19,6 +19,7 @@ func init() {
 	db = entity.GetDatabase()
 	configData = config.GetConfiguration()
 	demoparser.ConfigData = configData
+	demoparser.DB = db
 
 	configData.SetLoggingLevel()
 
@@ -30,6 +31,11 @@ func init() {
 
 func main() {
 	log.Info("starting demoparser")
+
+	demos := demo.ScanDemosDir(config.GetConfiguration().DemosDir)
+	for _, match := range demos {
+		entity.CreateDownloadedMatchFromMatchID(match.MatchID, match.Filename, match.MatchTime)
+	}
 
 	var nonParsedMatches []entity.Match
 
@@ -49,7 +55,7 @@ func main() {
 				continue
 			}
 			parser := &demoparser.DemoParser{}
-			demoFile := &demo.File{MatchID: match.MatchID, MatchTime: match.CreatedAt, Filename: fileName}
+			demoFile := &demo.File{MatchID: match.ID, MatchTime: match.CreatedAt, Filename: fileName}
 			err := parser.Parse(configData.DemosDir, demoFile)
 
 			if err != nil {
@@ -57,7 +63,10 @@ func main() {
 				continue
 			}
 
-			if !configData.IsDebug() {
+			result := parser.Match.Process()
+			persistErr := result.Persist()
+
+			if persistErr == nil && !configData.IsDebug() {
 				db.Model(&match).Update("Parsed", true)
 			}
 		}
