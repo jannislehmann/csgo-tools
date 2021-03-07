@@ -32,7 +32,7 @@ func (c *CS) HandleMatchList(packet *gamecoordinator.GCPacket) error {
 
 			var match entity.Match
 			// Preloading the share code slows down the process even though it is only needed for debugging purposes
-			DB.Preload("ShareCode").Find(&match, "match_id = ?", matchID)
+			DB.Preload("ShareCode").Find(&match, "id = ?", matchID)
 
 			match.MatchTime = time.Unix(int64(matchTime), 0)
 			match.DownloadURL = url
