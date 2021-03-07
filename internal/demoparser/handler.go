@@ -10,7 +10,7 @@ import (
 )
 
 // Inits the players and teams.
-func (p *DemoParser) handleMatchStart(events.MatchStart) {
+func (p *DemoParser) handleMatchStart(e events.MatchStart) {
 	p.Match.Map = p.Match.Header.MapName
 	p.SidesSwitched = false
 
@@ -24,10 +24,8 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 	ct := gameState.TeamCounterTerrorists()
 	t := gameState.TeamTerrorists()
 
-	teams := p.Match.Teams
-
-	teams[GetTeamIndex(t.Team(), p.SidesSwitched)] = &Team{State: t, StartedAs: common.TeamTerrorists}
-	teams[GetTeamIndex(ct.Team(), p.SidesSwitched)] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
+	p.Match.Teams[GetTeamIndex(t.Team(), p.SidesSwitched)] = &Team{State: t, StartedAs: common.TeamTerrorists}
+	p.Match.Teams[GetTeamIndex(ct.Team(), p.SidesSwitched)] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
 
 	// Create players and map them to the teams.
 	for _, player := range gameState.Participants().Playing() {
@@ -35,12 +33,7 @@ func (p *DemoParser) handleMatchStart(events.MatchStart) {
 			continue
 		}
 
-		teamID := GetTeamIndex(player.Team, p.SidesSwitched)
-		teamPlayers := p.Match.Teams[teamID].Players
-
-		customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
-
-		teamPlayers = append(teamPlayers, customPlayer)
+		p.AddPlayer(player)
 	}
 }
 
@@ -56,6 +49,10 @@ func (p *DemoParser) handleGamePhaseChanged(e events.GamePhaseChanged) {
 }
 
 func (p *DemoParser) handleRoundStart(e events.RoundStart) {
+	if p.RoundOngoing {
+		return
+	}
+
 	p.CurrentRound++
 	p.RoundOngoing = true
 	p.RoundStart = p.parser.CurrentTime()
@@ -97,23 +94,19 @@ func (p *DemoParser) handleRoundEnd(e events.RoundEnd) {
 }
 
 func (p *DemoParser) handleKill(e events.Kill) {
-	// Ignore warm-up kills
-	if p.CurrentRound == 0 {
+	if p.parser.GameState().IsWarmupPeriod() || p.CurrentRound == 0 {
 		return
 	}
 
 	victim, err := p.getPlayer(e.Victim)
 	if err != nil {
-		// TODO: This happens -> Either the victim disconnected or there is no victim? The steam id is not found in the structs.
-		// Create issue
 		log.Panic(err)
 	}
 
 	round := p.Match.Rounds[p.CurrentRound-1]
 	kill := &Kill{Time: p.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot, Victim: victim}
-	round.Kills = append(round.Kills, kill)
 
-	// Add optional killer if player died e.g. through fall damage
+	// Add optional killer if player died e.g. through fall damage.
 	if e.Killer != nil {
 		killer, err := p.getPlayer(e.Killer)
 		if err != nil {
@@ -130,6 +123,8 @@ func (p *DemoParser) handleKill(e events.Kill) {
 		}
 		kill.Assister = assister
 	}
+
+	round.Kills = append(round.Kills, kill)
 }
 
 func (p *DemoParser) debug(message string) {

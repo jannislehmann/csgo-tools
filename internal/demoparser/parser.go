@@ -33,6 +33,7 @@ type MatchData struct {
 	ID            uint64
 	Map           string
 	Header        *common.DemoHeader
+	Players       []*Player
 	Teams         [2]*Team
 	Duration      time.Duration
 	Time          time.Time
@@ -75,7 +76,7 @@ type Kill struct {
 
 // Parse takes a demo file and starts parsing by registering all required event handlers.
 func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
-	p.Match = &MatchData{ID: demoFile.MatchID}
+	p.Match = &MatchData{ID: demoFile.MatchID, Time: demoFile.MatchTime}
 
 	f, err := os.Open(path.Join(dir, demoFile.Filename))
 
@@ -106,10 +107,15 @@ func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
 }
 
 func (p *DemoParser) getPlayer(player *common.Player) (*Player, error) {
-	players := append(p.Match.Teams[0].Players, p.Match.Teams[1].Players...)
-	for _, localPlayer := range players {
+	for _, localPlayer := range p.Match.Players {
 		if player.SteamID64 == localPlayer.SteamID {
 			return localPlayer, nil
+		}
+	}
+
+	for _, gamePlayer := range p.parser.GameState().Participants().Playing() {
+		if player.SteamID64 == gamePlayer.SteamID64 {
+			return p.AddPlayer(player), nil
 		}
 	}
 
@@ -132,4 +138,18 @@ func GetTeamIndex(team common.Team, sidesSwitched bool) byte {
 
 	// Could also return an error here but we do not expect this to happen.
 	return 2
+}
+
+// AddPlayer adds a player to the game and returns the pointer.
+func (p *DemoParser) AddPlayer(player *common.Player) *Player {
+	teamID := GetTeamIndex(player.Team, p.SidesSwitched)
+	teams := p.Match.Teams
+	teamPlayers := teams[teamID].Players
+
+	customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
+
+	teams[teamID].Players = append(teamPlayers, customPlayer)
+	p.Match.Players = append(p.Match.Players, customPlayer)
+
+	return customPlayer
 }
