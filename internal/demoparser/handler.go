@@ -93,7 +93,7 @@ func (p *DemoParser) handleRoundEnd(e events.RoundEnd) {
 
 	round.Winner = p.Match.Teams[GetTeamIndex(e.Winner, p.SidesSwitched)]
 	round.WinReason = e.Reason
-	round.Duration = p.RoundStart - p.parser.CurrentTime()
+	round.Duration = p.parser.CurrentTime() - p.RoundStart
 }
 
 func (p *DemoParser) handleKill(e events.Kill) {
