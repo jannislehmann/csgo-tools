@@ -14,7 +14,7 @@ import (
 var configData *config.Config
 var db *gorm.DB
 
-// Sets up the global variables (config, db) and the logger
+// Sets up the global variables (config, db) and the logger.
 func init() {
 	db = entity.GetDatabase()
 	configData = config.GetConfiguration()
@@ -39,38 +39,57 @@ func main() {
 
 	var nonParsedMatches []entity.Match
 
-	// Create a loop that checks for unparsed demos
+	const numJobs = 5
+	matchQueue := make(chan entity.Match, numJobs)
+
+	// Start numJobs-times parallel workers.
+	for w := 1; w <= numJobs; w++ {
+		go worker(matchQueue)
+	}
+
+	// Create a loop that checks for unparsed demos.
 	t := time.NewTicker(time.Hour)
 	for {
-		// Get non-parsed matches from the db
+		// Get non-parsed matches from the db.
 		result := db.Find(&nonParsedMatches, "parsed = false")
 
 		if err := result.Error; err != nil {
 			log.Panic(err)
 		}
 
+		// Enqueue found matches.
 		for _, match := range nonParsedMatches {
-			fileName := match.Filename
-			if fileName == "" {
-				continue
-			}
-			parser := &demoparser.DemoParser{}
-			demoFile := &demo.File{MatchID: match.ID, MatchTime: match.CreatedAt, Filename: fileName}
-			err := parser.Parse(configData.DemosDir, demoFile)
-
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-
-			result := parser.Match.Process()
-			persistErr := result.Persist()
-
-			if persistErr == nil && !configData.IsDebug() {
-				db.Model(&match).Update("Parsed", true)
-			}
+			matchQueue <- match
 		}
 
 		<-t.C
+	}
+}
+
+// Takes a match from the channel, parses and persists it.
+func worker(matches <-chan entity.Match) {
+	for match := range matches {
+		fileName := match.Filename
+		if fileName == "" {
+			return
+		}
+
+		parser := &demoparser.DemoParser{}
+		demoFile := &demo.File{MatchID: match.ID, MatchTime: match.CreatedAt, Filename: fileName}
+		err := parser.Parse(configData.DemosDir, demoFile)
+
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		result := parser.Match.Process()
+		persistErr := result.Persist()
+
+		if persistErr == nil && !configData.IsDebug() {
+			db.Model(&match).Update("Parsed", true)
+		}
+
+		log.Infof("Finished parsing %d", demoFile.MatchID)
 	}
 }
