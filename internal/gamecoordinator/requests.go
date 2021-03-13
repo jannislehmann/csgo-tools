@@ -24,7 +24,7 @@ func (c *CS) RequestMatch(shareCode string) {
 		return
 	}
 
-	log.Debugf("requesting match details for %v %d", sc.Encoded, sc.MatchID)
+	log.Debugf("requesting match details for %v %d", sc.Encoded, sc.OutcomeID)
 
 	// Request match info
 	c.Write(uint32(protocol.ECsgoGCMsg_k_EMsgGCCStrike15_v2_MatchListRequestFullGameInfo), &protocol.CMsgGCCStrike15V2_MatchListRequestFullGameInfo{
