@@ -61,13 +61,13 @@ func DecodeShareCode(code string) *ShareCode {
 
 	a := swapEndianness(bigNumber)
 
-	outcomeid := big.NewInt(0)
 	matchid := big.NewInt(0)
+	outcomeid := big.NewInt(0)
 	token := big.NewInt(0)
 
-	outcomeid = outcomeid.And(a, big.NewInt(0).SetUint64(bitmask64))
-	matchid = matchid.Rsh(a, 64)
-	matchid = matchid.And(matchid, big.NewInt(0).SetUint64(bitmask64))
+	matchid = matchid.And(a, big.NewInt(0).SetUint64(bitmask64))
+	outcomeid = outcomeid.Rsh(a, 64)
+	outcomeid = outcomeid.And(outcomeid, big.NewInt(0).SetUint64(bitmask64))
 	token = token.Rsh(a, 128)
 	token = token.And(token, big.NewInt(0xFFFF))
 
