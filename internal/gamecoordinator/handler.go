@@ -22,23 +22,32 @@ func (c *CS) HandleMatchList(packet *gamecoordinator.GCPacket) error {
 	for _, match := range matchList.GetMatches() {
 		for _, round := range match.GetRoundstatsall() {
 			// Demo link is only linked in the last round and in this case the reserveration id is set.
+			// Reservation id is the outcome id.
 			if round.GetReservationid() == 0 {
 				continue
 			}
 
 			matchTime := match.GetMatchtime()
-			matchID := match.GetMatchid()
+			id := round.GetReservationid()
 			url := round.GetMap()
 
 			var match entity.Match
-			// Preloading the share code slows down the process even though it is only needed for debugging purposes
-			DB.Preload("ShareCode").Find(&match, "id = ?", matchID)
+
+			DB.Find(&match, "id = ? and download_url = '' AND downloaded = false", id)
+
+			if match.ID == 0 {
+				// Match is from the match history and does not exist in db -> create.
+				match.ID = id
+				DB.Create(&match)
+				log.Debugf("created match %d", match.ID)
+			}
 
 			match.MatchTime = time.Unix(int64(matchTime), 0)
 			match.DownloadURL = url
-			DB.Save(&match)
 
-			log.Debugf("saved match details for %s", match.ShareCode.Encoded)
+			DB.Save(&match)
+			log.Debugf("saved match details for %d", match.ID)
+
 		}
 	}
 
@@ -52,7 +61,7 @@ func (c *CS) HandleGCReady(e *GCReadyEvent) {
 
 	// Request demos for non-processed share codes from the database
 	var matches []entity.Match
-	t := time.NewTicker(time.Minute * 5)
+	t := time.NewTicker(time.Minute)
 	for {
 		result := DB.Preload("ShareCode").Find(&matches, "download_url = '' AND downloaded = false")
 
@@ -62,8 +71,8 @@ func (c *CS) HandleGCReady(e *GCReadyEvent) {
 
 		for _, match := range matches {
 			sc := match.ShareCode.Encoded
-			log.Debugf("requesting match details for %v", sc)
-			go c.RequestMatch(sc)
+			c.RequestMatch(sc)
+			time.Sleep(time.Second * 5)
 		}
 
 		<-t.C
