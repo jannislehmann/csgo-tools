@@ -22,7 +22,7 @@ type Match struct {
 
 // CreateMatch creates a match in the database. The match will be downloaded later.
 func CreateMatch(shareCode *ShareCode) *Match {
-	match := &Match{ID: shareCode.MatchID, ShareCode: *shareCode}
+	match := &Match{ID: shareCode.OutcomeID, ShareCode: *shareCode}
 	db.FirstOrCreate(match)
 	return match
 }
