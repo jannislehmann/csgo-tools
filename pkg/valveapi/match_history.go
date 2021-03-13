@@ -115,11 +115,11 @@ func DownloadDemo(url string, demoDir string, lastModified time.Time) error {
 	}
 
 	// Get file name
-	filename := strings.Split(path.Base(url), ".")[0] + ".dem"
-	filepath := path.Join(demoDir, filename)
+	fileName := strings.Split(path.Base(url), ".")[0] + ".dem"
+	filePath := path.Join(demoDir, fileName)
 
 	// Create the file
-	out, err := os.Create(filepath)
+	out, err := os.Create(filePath)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -144,13 +144,13 @@ func DownloadDemo(url string, demoDir string, lastModified time.Time) error {
 	}
 
 	// Update file modified information
-	err = os.Chtimes(filepath, lastModified, lastModified)
+	err = os.Chtimes(filePath, lastModified, lastModified)
 	if err != nil {
-		log.Warnf("unable to set correct last modified date for demo %v", filename)
+		log.Warnf("unable to set correct last modified date for demo %v", fileName)
 		log.Error(err)
 	}
 
-	log.Infof("downloaded demo %v", filename)
+	log.Infof("downloaded demo %v", fileName)
 
 	return nil
 }
