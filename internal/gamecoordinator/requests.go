@@ -4,6 +4,8 @@ import (
 	"github.com/Cludch/csgo-tools/internal/entity"
 	"github.com/Cludch/csgo-tools/internal/gamecoordinator/protocol"
 	"github.com/golang/protobuf/proto" //nolint //thinks break if we use the new package
+
+	log "github.com/sirupsen/logrus"
 )
 
 // GetRecentGames requests the players match history.
@@ -21,6 +23,8 @@ func (c *CS) RequestMatch(shareCode string) {
 	if sc == nil {
 		return
 	}
+
+	log.Debugf("requesting match details for %v %d", sc.Encoded, sc.MatchID)
 
 	// Request match info
 	c.Write(uint32(protocol.ECsgoGCMsg_k_EMsgGCCStrike15_v2_MatchListRequestFullGameInfo), &protocol.CMsgGCCStrike15V2_MatchListRequestFullGameInfo{
