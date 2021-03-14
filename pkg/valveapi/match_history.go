@@ -17,7 +17,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// MatchResponse contains information about the latest match
+// MatchResponse contains information about the latest match.
 type MatchResponse struct {
 	Result struct {
 		Nextcode string `json:"nextcode"`
@@ -70,21 +70,21 @@ func GetNextMatch(steamAPIKey string, steamID uint64, historyAuthenticationCode 
 
 	matchResponse := &MatchResponse{}
 
-	// Request match code
+	// Request match code.
 	r, err := http.Get(u.String())
 	if err != nil {
 		log.Error(err)
 		return "", err
 	}
 
-	// Forbidden = wrong api keys
-	// Precondition Failed = Know match code or steam id wrong
+	// Forbidden = wrong api keys.
+	// Precondition Failed = Know match code or steam id wrong.
 	if r.StatusCode == http.StatusForbidden || r.StatusCode == http.StatusPreconditionFailed {
 		r.Body.Close()
 		return "", &InvalidMatchHistoryCredentials{SteamID: steamIDString}
 	}
 
-	// Accepted means that there is no recent match code available
+	// Accepted means that there is no recent match code available.
 	if r.StatusCode == http.StatusAccepted {
 		r.Body.Close()
 		return "", nil
@@ -114,36 +114,38 @@ func DownloadDemo(url string, demoDir string, lastModified time.Time) error {
 		return &InvalidDownloadURLError{}
 	}
 
-	// Get file name
+	// Get file name.
 	fileName := strings.Split(path.Base(url), ".")[0] + ".dem"
 	filePath := path.Join(demoDir, fileName)
 
-	// Create the file
-	out, err := os.Create(filePath)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	defer out.Close()
-
-	// Get the data
+	// Get the data.
 	resp, err := http.Get(url) //nolint // We have to take dynamic replay urls in order to download them. URL is validated before.
 	if err != nil || resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
 		return &DemoNotFoundError{URL: url}
 	}
 
-	// Decompress and write to file
-	cr := bzip2.NewReader(resp.Body)
-	_, err = io.Copy(out, cr)
-
 	defer resp.Body.Close()
 
+	// Create the file.
+	out, err := os.Create(filePath)
+	defer out.Close()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// Decompress and write to file.
+	cr := bzip2.NewReader(resp.Body)
+	_, err = io.Copy(out, cr)
 	if err != nil {
 		return err
 	}
 
-	// Update file modified information
+	// Close file before trying to update the modified information.
+	out.Close()
+
+	// Update file modified information.
 	err = os.Chtimes(filePath, lastModified, lastModified)
 	if err != nil {
 		log.Warnf("unable to set correct last modified date for demo %v", fileName)
