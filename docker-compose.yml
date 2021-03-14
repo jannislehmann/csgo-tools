@@ -3,13 +3,14 @@ version: '3'
 services:
   apiclient:
     image: cludch/csgo-tools:latest
+    command: "apiclient"
     container_name: apiclient
     restart: unless-stopped
     depends_on:
       - db
     volumes: 
       - ./demos:/demos
-      - ./config:/config
+      - ./configs:/app/configs
 
   db:
     image: postgres:13
