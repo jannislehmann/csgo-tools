@@ -33,7 +33,11 @@ func (c *CS) HandleMatchList(packet *gamecoordinator.GCPacket) error {
 
 			var match entity.Match
 
-			DB.Find(&match, "id = ? and download_url = '' AND downloaded = false", id)
+			DB.Find(&match, "id = ?", id)
+
+			if match.DownloadURL != "" || match.Downloaded {
+				continue
+			}
 
 			if match.ID == 0 {
 				// Match is from the match history and does not exist in db -> create.
