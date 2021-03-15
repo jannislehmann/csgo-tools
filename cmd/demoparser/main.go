@@ -76,6 +76,7 @@ func worker(matches <-chan entity.Match) {
 
 		parser := &demoparser.DemoParser{}
 		demoFile := &demo.File{MatchID: match.ID, MatchTime: match.CreatedAt, Filename: fileName}
+
 		err := parser.Parse(configData.DemosDir, demoFile)
 
 		if err != nil {
