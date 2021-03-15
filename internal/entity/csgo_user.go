@@ -17,7 +17,7 @@ type CSGOUser struct {
 	DeletedAt                      gorm.DeletedAt `gorm:"index"`
 	SteamID                        uint64         `gorm:"primaryKey"`
 	MatchHistoryAuthenticationCode string
-	ShareCode                      ShareCode `gorm:"foreignKey:ShareCodeID;references:MatchID"`
+	ShareCode                      ShareCode `gorm:"foreignKey:ShareCodeID;references:OutcomeID"`
 	ShareCodeID                    uint64
 	Disabled                       bool
 }

@@ -15,10 +15,10 @@ type ShareCode struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-	OutcomeID uint64
+	OutcomeID uint64         `gorm:"primaryKey"`
 	MatchID   uint64
 	Token     uint32
-	Encoded   string `gorm:"primaryKey"` // redundant but saves some processing time and the encoding mechanism is not implemented.
+	Encoded   string // redundant but saves some processing time and the encoding mechanism is not implemented.
 }
 
 // dictionary is used for the share code decoding.
