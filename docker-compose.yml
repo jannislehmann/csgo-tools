@@ -9,6 +9,38 @@ services:
     depends_on:
       - db
     volumes: 
+      - ./configs:/app/configs
+
+  demodownloader:
+    image: cludch/csgo-tools:latest
+    command: "demodownloader"
+    container_name: demodownloader
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes: 
+      - ./demos:/demos
+      - ./configs:/app/configs
+
+  gameclient:
+    image: cludch/csgo-tools:latest
+    command: "gameclient"
+    container_name: gameclient
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes: 
+      - ./demos:/demos
+      - ./configs:/app/configs
+
+  demoparser:
+    image: cludch/csgo-tools:latest
+    command: "demoparser"
+    container_name: demoparser
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes: 
       - ./demos:/demos
       - ./configs:/app/configs
 
