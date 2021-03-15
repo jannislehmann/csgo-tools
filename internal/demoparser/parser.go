@@ -70,6 +70,7 @@ type Kill struct {
 	Killer        *Player
 	Assister      *Player
 	Weapon        common.EquipmentType
+	IsDuringRound bool
 	IsHeadshot    bool
 	AssistedFlash bool
 	AttackerBlind bool
