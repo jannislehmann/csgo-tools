@@ -104,7 +104,9 @@ func (p *DemoParser) handleKill(e events.Kill) {
 	}
 
 	round := p.Match.Rounds[p.CurrentRound-1]
-	kill := &Kill{Time: p.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot, Victim: victim}
+	kill := &Kill{Time: p.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot, Victim: victim,
+		AssistedFlash: e.AssistedFlash, AttackerBlind: e.AttackerBlind, NoScope: e.NoScope,
+		ThroughSmoke: e.ThroughSmoke, ThroughWall: e.IsWallBang()}
 
 	// Add optional killer if player died e.g. through fall damage.
 	if e.Killer != nil {
