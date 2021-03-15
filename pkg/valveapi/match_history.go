@@ -129,11 +129,12 @@ func DownloadDemo(url string, demoDir string, lastModified time.Time) error {
 
 	// Create the file.
 	out, err := os.Create(filePath)
-	defer out.Close()
 	if err != nil {
+		out.Close()
 		log.Error(err)
 		return err
 	}
+	defer out.Close()
 
 	// Decompress and write to file.
 	cr := bzip2.NewReader(resp.Body)

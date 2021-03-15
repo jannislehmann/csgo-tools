@@ -163,7 +163,7 @@ func (m *MatchResult) Print() {
 // Persist persists the match results in the database.
 // Persisting associations with composite primary keys does not seem to work.
 func (m *MatchResult) Persist() error {
-	DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.Transaction(func(tx *gorm.DB) error {
 
 		for _, team := range m.Teams {
 			for _, player := range team.Players {
@@ -184,7 +184,7 @@ func (m *MatchResult) Persist() error {
 		return nil
 	})
 
-	return nil
+	return err
 }
 
 func getTeamIndex(team common.Team) byte {

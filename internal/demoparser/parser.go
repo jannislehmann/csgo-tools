@@ -96,7 +96,7 @@ func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
 	defer f.Close()
 
 	// Parsing the header within an event handler crashes.
-	header, err := p.parser.ParseHeader()
+	header, _ := p.parser.ParseHeader()
 	p.Match.Header = &header
 	p.Match.ParserVersion = 1
 
