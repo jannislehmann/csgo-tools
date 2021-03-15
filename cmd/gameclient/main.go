@@ -25,11 +25,7 @@ func init() {
 		log.Error(err)
 	}
 
-	if configData.IsDebug() {
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetLevel(log.InfoLevel)
-	}
+	configData.SetLoggingLevel()
 
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
@@ -43,7 +39,7 @@ func init() {
 func main() {
 	demos := demo.ScanDemosDir(config.GetConfiguration().DemosDir)
 	for _, match := range demos {
-		entity.CreateDownloadedMatchFromMatchID(match.MatchID, match.Filename)
+		entity.CreateDownloadedMatchFromMatchID(match.MatchID, match.Filename, match.MatchTime)
 	}
 
 	totpInstance := totp.NewTotp(configData.Steam.TwoFactorSecret)

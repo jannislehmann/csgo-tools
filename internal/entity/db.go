@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/Cludch/csgo-tools/internal/config"
+	"github.com/Cludch/csgo-tools/internal/demoparser"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -23,13 +24,18 @@ func init() {
 
 	db = conn
 
-	// Create / migrate tables
+	// Create / migrate tables.
+	// Match results.
+	db.AutoMigrate(&demoparser.PlayerResult{}) //nolint
+	db.AutoMigrate(&demoparser.TeamResult{})   //nolint
+	db.AutoMigrate(&demoparser.MatchResult{})  //nolint
+	// Match and user information.
 	db.AutoMigrate(&ShareCode{}) //nolint
 	db.AutoMigrate(&CSGOUser{})  //nolint
 	db.AutoMigrate(&Match{})     //nolint
 }
 
-// GetDatabase returns a database connection
+// GetDatabase returns a database connection.
 func GetDatabase() *gorm.DB {
 	return db
 }

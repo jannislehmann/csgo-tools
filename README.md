@@ -24,6 +24,15 @@ The game client uses the CSGO gamecoordinator to talk to the ingame "API". By do
 
 The demo downloader takes the demo urls from the database and downloads them if they are missing.
 
+## Demoparser
+
+The demo parser parses the previously downloaded demo files and calculates the following statistics for each player:
+* Kills, Deaths, Assists, Headshots and percentage
+  * Also each per weapon
+* Player MVPs
+* Map
+* Team Scores
+
 ## Usage
 
 Get the latest binary and set up your demo location and the config file.

@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// ShareCode holds the match and share code
+// ShareCode holds the match and share code.
 type ShareCode struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -27,8 +27,8 @@ const dictionary = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefhijkmnopqrstuvwxyz23456789"
 // Used for share code decoding.
 var bitmask64 uint64 = 18446744073709551615
 
-// CreateShareCodeFromEncoded creates a database entity from the encoded share code
-// The encoded share code will be decoded first
+// CreateShareCodeFromEncoded creates a database entity from the encoded share code.
+// The encoded share code will be decoded first.
 func CreateShareCodeFromEncoded(shareCode string) *ShareCode {
 	sc := DecodeShareCode(shareCode)
 	db.FirstOrCreate(&sc)
@@ -38,7 +38,7 @@ func CreateShareCodeFromEncoded(shareCode string) *ShareCode {
 	return sc
 }
 
-// DecodeShareCode decodes the share code. Taken from ValvePython/csgo
+// DecodeShareCode decodes the share code. Taken from ValvePython/csgo.
 func DecodeShareCode(code string) *ShareCode {
 	var validateRe = regexp.MustCompile(`^CSGO(-?[\w]{5}){5}$`)
 	found := validateRe.MatchString(code)
@@ -75,7 +75,7 @@ func DecodeShareCode(code string) *ShareCode {
 	return shareCode
 }
 
-// reverse reverses a string
+// reverse a string.
 func reverse(s string) (result string) {
 	for _, v := range s {
 		result = string(v) + result
@@ -83,7 +83,7 @@ func reverse(s string) (result string) {
 	return
 }
 
-// swapEndianness changes the byte order
+// swapEndianness changes the byte order.
 func swapEndianness(number *big.Int) *big.Int {
 	result := big.NewInt(0)
 
