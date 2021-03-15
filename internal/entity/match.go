@@ -8,16 +8,16 @@ import (
 
 // Match holds the central information about a csgo match
 type Match struct {
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	ID          uint64         `gorm:"primaryKey"`
-	ShareCode   ShareCode
-	Filename    string
-	MatchTime   time.Time
-	DownloadURL string
-	Downloaded  bool
-	Parsed      bool
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     gorm.DeletedAt `gorm:"index"`
+	ID            uint64         `gorm:"primaryKey"`
+	ShareCode     ShareCode
+	Filename      string
+	MatchTime     time.Time
+	DownloadURL   string
+	Downloaded    bool
+	ParserVersion byte
 }
 
 // CreateMatch creates a match in the database. The match will be downloaded later.

@@ -30,15 +30,14 @@ type DemoParser struct {
 
 // MatchData holds information about the match itself.
 type MatchData struct {
-	ID            uint64
-	Map           string
-	Header        *common.DemoHeader
-	Players       []*Player
-	Teams         [2]*Team
-	Duration      time.Duration
-	Time          time.Time
-	Rounds        []*Round
-	ParserVersion byte
+	ID       uint64
+	Map      string
+	Header   *common.DemoHeader
+	Players  []*Player
+	Teams    [2]*Team
+	Duration time.Duration
+	Time     time.Time
+	Rounds   []*Round
 }
 
 // Team represents a team and links to it's players.
@@ -98,7 +97,6 @@ func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
 	// Parsing the header within an event handler crashes.
 	header, _ := p.parser.ParseHeader()
 	p.Match.Header = &header
-	p.Match.ParserVersion = 1
 
 	// Register all handler
 	p.parser.RegisterEventHandler(p.handleMatchStart)

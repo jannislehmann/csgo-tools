@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const ParserVersion = 1
+
 var configData *config.Config
 var db *gorm.DB
 
@@ -51,7 +53,7 @@ func main() {
 	t := time.NewTicker(time.Hour)
 	for {
 		// Get non-parsed matches from the db.
-		result := db.Find(&nonParsedMatches, "parsed = false")
+		result := db.Find(&nonParsedMatches, "parser_version < ?", ParserVersion)
 
 		if err := result.Error; err != nil {
 			log.Panic(err)
@@ -74,6 +76,12 @@ func worker(matches <-chan entity.Match) {
 			return
 		}
 
+		// Remove old results if version is newer.
+		if match.ParserVersion < ParserVersion {
+			db.Delete(&demoparser.MatchResult{}, match.ID)
+			log.Debugf("Deleted match result for %d due to parser update", match.ID)
+		}
+
 		parser := &demoparser.DemoParser{}
 		demoFile := &demo.File{MatchID: match.ID, MatchTime: match.CreatedAt, Filename: fileName}
 
@@ -88,7 +96,7 @@ func worker(matches <-chan entity.Match) {
 		persistErr := result.Persist()
 
 		if persistErr == nil && !configData.IsDebug() {
-			db.Model(&match).Update("Parsed", true)
+			db.Model(&match).Updates(entity.Match{ParserVersion: ParserVersion})
 		}
 
 		log.Infof("Finished parsing %d", demoFile.MatchID)

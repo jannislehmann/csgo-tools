@@ -25,13 +25,14 @@ func init() {
 	db = conn
 
 	// Create / migrate tables.
-	db.AutoMigrate(&ShareCode{}) //nolint
-	db.AutoMigrate(&CSGOUser{})  //nolint
-	db.AutoMigrate(&Match{})     //nolint
 	// Match results.
 	db.AutoMigrate(&demoparser.PlayerResult{}) //nolint
 	db.AutoMigrate(&demoparser.TeamResult{})   //nolint
 	db.AutoMigrate(&demoparser.MatchResult{})  //nolint
+	// Match and user information.
+	db.AutoMigrate(&ShareCode{}) //nolint
+	db.AutoMigrate(&CSGOUser{})  //nolint
+	db.AutoMigrate(&Match{})     //nolint
 }
 
 // GetDatabase returns a database connection.
