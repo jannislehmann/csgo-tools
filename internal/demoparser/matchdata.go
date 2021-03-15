@@ -28,6 +28,7 @@ type MatchResult struct {
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
 	gorm.Model
+	TeamID          byte   `gorm:"primaryKey"`
 	MatchID         uint64 `gorm:"primaryKey"`
 	StartedAs       common.Team
 	Players         []*PlayerResult `gorm:"foreignKey:SteamID"`
@@ -65,14 +66,14 @@ func (m *MatchData) Process() *MatchResult {
 	// Create teams.
 	for _, team := range m.Teams {
 		// Could also use team.State.ID - 2 as they return the same as the enum.
-		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{StartedAs: team.StartedAs}
+		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchID: m.ID, TeamID: byte(team.StartedAs), StartedAs: team.StartedAs}
 	}
 
 	// Create players
 	for _, player := range m.Players {
 		// Get starting team and append player.
 		team := result.Teams[getTeamIndex(player.Team.StartedAs)]
-		team.Players = append(team.Players, &PlayerResult{SteamID: player.SteamID, Name: player.Name})
+		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, Name: player.Name})
 	}
 
 	result.processRounds(m.Rounds)
@@ -113,9 +114,10 @@ func (m *MatchResult) processRounds(rounds []*Round) {
 				playerKills[killer]++
 			}
 
-			// Assister may not be set
+			// Assister may not be set.
 			if kill.Assister != nil {
-				m.getPlayer(kill.Assister).Assists++
+				assister := m.getPlayer(kill.Assister)
+				assister.Assists++
 			}
 		}
 
@@ -159,9 +161,30 @@ func (m *MatchResult) Print() {
 }
 
 // Persist persists the match results in the database.
+// Persisting associations with composite primary keys does not seem to work.
 func (m *MatchResult) Persist() error {
-	// TODO: Persist
-	return DB.Create(&m).Error
+	DB.Transaction(func(tx *gorm.DB) error {
+
+		for _, team := range m.Teams {
+			for _, player := range team.Players {
+				if err := tx.Create(player).Error; err != nil {
+					return err
+				}
+			}
+
+			if err := tx.Omit("Players").Create(team).Error; err != nil {
+				return err
+			}
+		}
+
+		if err := tx.Omit("Teams").Create(m).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return nil
 }
 
 func getTeamIndex(team common.Team) byte {
