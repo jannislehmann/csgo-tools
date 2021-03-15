@@ -53,7 +53,7 @@ func main() {
 	t := time.NewTicker(time.Hour)
 	for {
 		// Get non-parsed matches from the db.
-		result := db.Find(&nonParsedMatches, "parser_version < ?", ParserVersion)
+		result := db.Find(&nonParsedMatches, "downloaded = true AND parser_version < ?", ParserVersion)
 
 		if err := result.Error; err != nil {
 			log.Panic(err)
