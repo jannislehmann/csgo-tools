@@ -82,6 +82,16 @@ jobs:
           asset_path: ./bin/gameclient
           asset_name: gameclient-${{ github.ref }}
           asset_content_type: application/vnd.github.VERSION.raw
+      - name: Upload Demoparser Release Asset
+        id: upload-demoparser-release-asset  
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bin/demoparser
+          asset_name: demoparser-${{ github.ref }}
+          asset_content_type: application/vnd.github.VERSION.raw
 
   dockerhub:
     name: Docker
