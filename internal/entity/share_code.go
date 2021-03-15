@@ -15,10 +15,10 @@ type ShareCode struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-	MatchID   uint64         `gorm:"primaryKey"`
 	OutcomeID uint64
+	MatchID   uint64
 	Token     uint32
-	Encoded   string // redundant but saves some processing time and the encoding mechanism is not implemented.
+	Encoded   string `gorm:"primaryKey"` // redundant but saves some processing time and the encoding mechanism is not implemented.
 }
 
 // dictionary is used for the share code decoding.
@@ -31,10 +31,11 @@ var bitmask64 uint64 = 18446744073709551615
 // The encoded share code will be decoded first.
 func CreateShareCodeFromEncoded(shareCode string) *ShareCode {
 	sc := DecodeShareCode(shareCode)
-	db.FirstOrCreate(&sc)
 	if sc == nil {
-		log.Warnf("unable to decode next share code %v", shareCode)
+		log.Warnf("unable to decode share code %v", shareCode)
+		return nil
 	}
+	db.FirstOrCreate(&sc)
 	return sc
 }
 
