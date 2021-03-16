@@ -6,7 +6,6 @@ and uses the Steam web API to check whether a new demo can be fetched. If that i
 The GC then returns information about the match which also contain a download link.
 
 The tool saves all the match ids from the demos in the `demos` directory. This is used to prevent downloading a demo every few minutes.
-At a later point, I plan to extend the toolset with a separate basic demo analyzer.
 
 ## Tools
 
@@ -18,7 +17,7 @@ The API client consumes Valve's game history API and saves the game share codes 
 
 ### Gameclient
 
-The game client uses the CSGO gamecoordinator to talk to the ingame "API". By doing so, the tool can request match information, history and even the download links for each demo.
+The game client uses the CSGO gamecoordinator to talk to the ingame "API". By doing so, the tool can request match information, history and most importantly the download links for each demo.
 
 ### Demodownloader
 
@@ -27,11 +26,15 @@ The demo downloader takes the demo urls from the database and downloads them if 
 ## Demoparser
 
 The demo parser parses the previously downloaded demo files and calculates the following statistics for each player:
-* Kills, Deaths, Assists, Headshots and percentage
-  * Also each per weapon
+* Kills, Deaths, (Flash) Assists, Headshots and percentage
+  * Information about the kill such as wallbang, flashed, through smoke
+  * Also on per weapon basis
 * Player MVPs
 * Map
 * Team Scores
+
+When a new demoparser version gets released, the tool will automatically reparse demos, which were parsed with
+an older version. Therefore, new statistiscs will also be added for older demos. This, however, requires the demos to be permanently persisted.
 
 ## Usage
 

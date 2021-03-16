@@ -17,7 +17,7 @@ type MatchResult struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-	ID        uint64         `gorm:"primaryKey"`
+	ID        uint64         `gorm:"primaryKey;autoIncrement:false"`
 	Map       string
 	Time      time.Time
 	Duration  time.Duration
@@ -28,8 +28,8 @@ type MatchResult struct {
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
 	gorm.Model
-	TeamID          byte   `gorm:"primaryKey"`
-	MatchID         uint64 `gorm:"primaryKey"`
+	TeamID          byte   `gorm:"primaryKey;autoIncrement:false"`
+	MatchID         uint64 `gorm:"primaryKey;autoIncrement:false"`
 	StartedAs       common.Team
 	Players         []*PlayerResult `gorm:"foreignKey:SteamID"`
 	Wins            byte
@@ -41,8 +41,8 @@ type PlayerResult struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
-	MatchID      uint64         `gorm:"primaryKey"`
-	SteamID      uint64         `gorm:"primaryKey"`
+	MatchID      uint64         `gorm:"primaryKey;autoIncrement:false"`
+	SteamID      uint64         `gorm:"primaryKey;autoIncrement:false"`
 	Name         string
 	Kills        byte
 	EntryKills   byte
@@ -69,7 +69,7 @@ func (m *MatchData) Process() *MatchResult {
 		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchID: m.ID, TeamID: byte(team.StartedAs), StartedAs: team.StartedAs}
 	}
 
-	// Create players
+	// Create players.
 	for _, player := range m.Players {
 		// Get starting team and append player.
 		team := result.Teams[getTeamIndex(player.Team.StartedAs)]
@@ -93,7 +93,7 @@ func (m *MatchResult) processRounds(rounds []*Round) {
 		winner := m.getTeam(round.Winner.StartedAs)
 		winner.Wins++
 
-		// Pistol round wins
+		// Pistol round wins.
 		roundNumber := index + 1
 		if roundNumber == 1 || roundNumber == 16 {
 			winner.PistolRoundWins++
@@ -101,10 +101,10 @@ func (m *MatchResult) processRounds(rounds []*Round) {
 
 		playerKills := make(map[*PlayerResult]byte)
 
-		// Process in round function in order to calculate all round information like amount of kills / round
+		// Process in round function in order to calculate all round information like amount of kills / round.
 		for _, kill := range round.Kills {
 			m.getPlayer(kill.Victim).Deaths++
-			// Killer may not be set if the player died e.g. through fall damage
+			// Killer may not be set if the player died e.g. through fall damage.
 			if kill.Killer != nil {
 				killer := m.getPlayer(kill.Killer)
 				killer.Kills++

@@ -11,7 +11,7 @@ type Match struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
-	ID            uint64         `gorm:"primaryKey"`
+	ID            uint64         `gorm:"primaryKey;autoIncrement:false"`
 	ShareCode     ShareCode
 	Filename      string
 	MatchTime     time.Time

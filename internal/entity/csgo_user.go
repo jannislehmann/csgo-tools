@@ -15,10 +15,10 @@ type CSGOUser struct {
 	CreatedAt                      time.Time
 	UpdatedAt                      time.Time
 	DeletedAt                      gorm.DeletedAt `gorm:"index"`
-	SteamID                        uint64         `gorm:"primaryKey"`
+	SteamID                        uint64         `gorm:"primaryKey;autoIncrement:false"`
 	MatchHistoryAuthenticationCode string
-	ShareCode                      ShareCode `gorm:"foreignKey:ShareCodeID;references:OutcomeID"`
-	ShareCodeID                    uint64
+	ShareCode                      ShareCode
+	ShareCodeID                    string
 	Disabled                       bool
 }
 
