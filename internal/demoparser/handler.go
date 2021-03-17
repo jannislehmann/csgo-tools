@@ -98,32 +98,30 @@ func (p *DemoParser) handleKill(e events.Kill) {
 		return
 	}
 
-	victim, err := p.getPlayer(e.Victim)
-	if err != nil {
-		log.Panic(err)
-	}
-
 	round := p.Match.Rounds[p.CurrentRound-1]
-	kill := &Kill{Time: p.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot, Victim: victim,
+	kill := &Kill{Time: p.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot,
 		AssistedFlash: e.AssistedFlash, AttackerBlind: e.AttackerBlind, NoScope: e.NoScope,
 		ThroughSmoke: e.ThroughSmoke, ThroughWall: e.IsWallBang(), IsDuringRound: p.RoundOngoing}
+
+	victim, err := p.getPlayer(e.Victim)
+	if err == nil {
+		kill.Victim = victim
+	}
 
 	// Add optional killer if player died e.g. through fall damage.
 	if e.Killer != nil {
 		killer, err := p.getPlayer(e.Killer)
-		if err != nil {
-			log.Panic(err)
+		if err == nil {
+			kill.Killer = killer
 		}
-		kill.Killer = killer
 	}
 
-	// Add optional assister
+	// Add optional assister.
 	if e.Assister != nil {
 		assister, err := p.getPlayer(e.Assister)
-		if err != nil {
-			log.Panic(err)
+		if err == nil {
+			kill.Assister = assister
 		}
-		kill.Assister = assister
 	}
 
 	round.Kills = append(round.Kills, kill)

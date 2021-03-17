@@ -111,6 +111,10 @@ func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
 }
 
 func (p *DemoParser) getPlayer(player *common.Player) (*Player, error) {
+	if player.IsBot {
+		return nil, errors.New("Player is a bot")
+	}
+
 	for _, localPlayer := range p.Match.Players {
 		if player.SteamID64 == localPlayer.SteamID {
 			return localPlayer, nil

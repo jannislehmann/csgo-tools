@@ -71,6 +71,10 @@ func (m *MatchData) Process() *MatchResult {
 
 	// Create players.
 	for _, player := range m.Players {
+		if player.SteamID == 0 {
+			log.Debugf("steamid 0 for %s in %d", player.Name, m.ID)
+		}
+
 		// Get starting team and append player.
 		team := result.Teams[getTeamIndex(player.Team.StartedAs)]
 		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, Name: player.Name})
@@ -103,13 +107,21 @@ func (m *MatchResult) processRounds(rounds []*Round) {
 
 		// Process in round function in order to calculate all round information like amount of kills / round.
 		for _, kill := range round.Kills {
-			m.getPlayer(kill.Victim).Deaths++
+			// Victim may be null, if it was a bot.
+			if kill.Victim != nil {
+				m.getPlayer(kill.Victim).Deaths++
+			}
+
 			// Killer may not be set if the player died e.g. through fall damage.
 			if kill.Killer != nil {
 				killer := m.getPlayer(kill.Killer)
 				killer.Kills++
 				if kill.IsHeadshot {
 					killer.Headshots++
+				}
+
+				if _, found := playerKills[killer]; !found {
+					playerKills[killer] = 0
 				}
 				playerKills[killer]++
 			}
