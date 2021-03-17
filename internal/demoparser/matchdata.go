@@ -135,7 +135,7 @@ func (m *MatchResult) processRounds(rounds []*Round) {
 
 		// Increase players 3/4/5 Kills per round.
 		for player, kills := range playerKills {
-			if kills >= 2 {
+			if kills <= 2 {
 				continue
 			}
 
