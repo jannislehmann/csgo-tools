@@ -2,7 +2,7 @@ version: '3'
 
 services:
   apiclient:
-    image: cludch/csgo-tools:latest
+    image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
     command: "apiclient"
     container_name: apiclient
     restart: unless-stopped
@@ -12,7 +12,7 @@ services:
       - ./configs:/app/configs
 
   demodownloader:
-    image: cludch/csgo-tools:latest
+    image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
     command: "demodownloader"
     container_name: demodownloader
     restart: unless-stopped
@@ -23,7 +23,7 @@ services:
       - ./configs:/app/configs
 
   gameclient:
-    image: cludch/csgo-tools:latest
+    image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
     command: "gameclient"
     container_name: gameclient
     restart: unless-stopped
@@ -34,7 +34,7 @@ services:
       - ./configs:/app/configs
 
   demoparser:
-    image: cludch/csgo-tools:latest
+    image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
     command: "demoparser"
     container_name: demoparser
     restart: unless-stopped
