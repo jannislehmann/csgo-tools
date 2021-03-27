@@ -22,14 +22,14 @@ type MatchResult struct {
 	Time      time.Time      `json:"time"`
 	Duration  time.Duration  `json:"duration"`
 	// 0 = T / 1 = CT
-	Teams []*TeamResult ` json:"teams" gorm:"foreignKey:ID"`
+	Teams []*TeamResult `json:"teams,omitempty" gorm:"foreignKey:ID"`
 }
 
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
 	gorm.Model      `json:"-"`
 	TeamID          byte            `json:"id" gorm:"primaryKey;autoIncrement:false"`
-	MatchID         uint64          `gorm:"primaryKey;autoIncrement:false"`
+	MatchID         uint64          `json:"-" gorm:"primaryKey;autoIncrement:false"`
 	StartedAs       common.Team     `json:"startedAs"`
 	Players         []*PlayerResult `json:"players" gorm:"foreignKey:SteamID"`
 	Wins            byte            `json:"wins"`
@@ -42,8 +42,8 @@ type PlayerResult struct {
 	UpdatedAt    time.Time      `json:"-"`
 	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
 	MatchID      uint64         `json:"-" gorm:"primaryKey;autoIncrement:false"`
-	SteamID      uint64         `json:"id" gorm:"primaryKey;autoIncrement:false"`
-	Name         string         `json:"name"`
+	SteamID      uint64         `json:"id,omitempty" gorm:"primaryKey;autoIncrement:false"`
+	Name         string         `json:"name,omitempty"`
 	Kills        byte           `json:"kills"`
 	EntryKills   byte           `json:"entryKills"`
 	Headshots    byte           `json:"headshots"`
