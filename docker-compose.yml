@@ -43,6 +43,16 @@ services:
     volumes: 
       - ./demos:/demos
       - ./configs:/app/configs
+  
+  api:
+    image: cludch/csgo-tools:latest
+    command: "restapi"
+    container_name: api
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes: 
+      - ./configs:/app/configs
 
   db:
     image: postgres:13
