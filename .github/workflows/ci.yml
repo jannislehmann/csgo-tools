@@ -93,11 +93,12 @@ jobs:
           asset_name: demoparser-${{ github.ref }}
           asset_content_type: application/vnd.github.VERSION.raw
 
-  dockerhub:
+  docker:
     name: Docker
     runs-on: ubuntu-20.04
     needs: build
-    if: github.ref == 'refs/heads/main'
+    # Run on tag
+    if: github.ref == 'refs/heads/main' OR startsWith( github.ref, 'refs/tags/releases/')
     steps:
       - name: Checkout
         uses: actions/checkout@v2
