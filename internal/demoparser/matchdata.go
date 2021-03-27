@@ -14,48 +14,48 @@ var DB *gorm.DB
 
 // MatchResult holds meta data and the teams of one match.
 type MatchResult struct {
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	ID        uint64         `gorm:"primaryKey;autoIncrement:false"`
-	Map       string
-	Time      time.Time
-	Duration  time.Duration
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	ID        uint64         `json:"id" gorm:"primaryKey;autoIncrement:false"`
+	Map       string         `json:"map"`
+	Time      time.Time      `json:"time"`
+	Duration  time.Duration  `json:"duration"`
 	// 0 = T / 1 = CT
-	Teams []*TeamResult `gorm:"foreignKey:ID"`
+	Teams []*TeamResult ` json:"teams" gorm:"foreignKey:ID"`
 }
 
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
-	gorm.Model
-	TeamID          byte   `gorm:"primaryKey;autoIncrement:false"`
-	MatchID         uint64 `gorm:"primaryKey;autoIncrement:false"`
-	StartedAs       common.Team
-	Players         []*PlayerResult `gorm:"foreignKey:SteamID"`
-	Wins            byte
-	PistolRoundWins byte
+	gorm.Model      `json:"-"`
+	TeamID          byte            `json:"id" gorm:"primaryKey;autoIncrement:false"`
+	MatchID         uint64          `gorm:"primaryKey;autoIncrement:false"`
+	StartedAs       common.Team     `json:"startedAs"`
+	Players         []*PlayerResult `json:"players" gorm:"foreignKey:SteamID"`
+	Wins            byte            `json:"wins"`
+	PistolRoundWins byte            `json:"pistolRoundWins"`
 }
 
 // PlayerResult holds different performance metrics from one game.
 type PlayerResult struct {
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	DeletedAt    gorm.DeletedAt `gorm:"index"`
-	MatchID      uint64         `gorm:"primaryKey;autoIncrement:false"`
-	SteamID      uint64         `gorm:"primaryKey;autoIncrement:false"`
-	Name         string
-	Kills        byte
-	EntryKills   byte
-	Headshots    byte
-	Assists      byte
-	Deaths       byte
-	MVPs         byte
-	Won1v3       byte
-	Won1v4       byte
-	Won1v5       byte
-	RoundsWith3K byte
-	RoundsWith4K byte
-	RoundsWith5K byte
+	CreatedAt    time.Time      `json:"-"`
+	UpdatedAt    time.Time      `json:"-"`
+	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+	MatchID      uint64         `json:"-" gorm:"primaryKey;autoIncrement:false"`
+	SteamID      uint64         `json:"id" gorm:"primaryKey;autoIncrement:false"`
+	Name         string         `json:"name"`
+	Kills        byte           `json:"kills"`
+	EntryKills   byte           `json:"entryKills"`
+	Headshots    byte           `json:"headshots"`
+	Assists      byte           `json:"assists"`
+	Deaths       byte           `json:"deaths"`
+	MVPs         byte           `json:"mvps"`
+	Won1v3       byte           `json:"won1v3"`
+	Won1v4       byte           `json:"won1v4"`
+	Won1v5       byte           `json:"won1v5"`
+	RoundsWith3K byte           `json:"3k"`
+	RoundsWith4K byte           `json:"4k"`
+	RoundsWith5K byte           `json:"5k"`
 }
 
 // Process processes the match data and creates more performance-based results per player in order to persist these in the database.
