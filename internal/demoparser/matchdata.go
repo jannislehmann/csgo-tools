@@ -28,7 +28,7 @@ type MatchResult struct {
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
 	gorm.Model      `json:"-"`
-	TeamID          byte            `json:"id" gorm:"primaryKey;autoIncrement:false"`
+	ID              byte            `json:"id" gorm:"primaryKey;autoIncrement:false"`
 	MatchID         uint64          `json:"-" gorm:"primaryKey;autoIncrement:false"`
 	StartedAs       common.Team     `json:"startedAs"`
 	Players         []*PlayerResult `json:"players" gorm:"foreignKey:SteamID"`
@@ -41,7 +41,8 @@ type PlayerResult struct {
 	CreatedAt    time.Time      `json:"-"`
 	UpdatedAt    time.Time      `json:"-"`
 	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
-	MatchID      uint64         `json:"-" gorm:"primaryKey;autoIncrement:false"`
+	MatchID      uint64         `json:"match" gorm:"primaryKey;autoIncrement:false"`
+	TeamID       byte           `json:"team" gorm:"primaryKey;autoIncrement:false"`
 	SteamID      uint64         `json:"id,omitempty" gorm:"primaryKey;autoIncrement:false"`
 	Name         string         `json:"name,omitempty"`
 	Kills        byte           `json:"kills"`
@@ -66,7 +67,7 @@ func (m *MatchData) Process() *MatchResult {
 	// Create teams.
 	for _, team := range m.Teams {
 		// Could also use team.State.ID - 2 as they return the same as the enum.
-		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchID: m.ID, TeamID: byte(team.StartedAs), StartedAs: team.StartedAs}
+		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchID: m.ID, ID: byte(team.StartedAs), StartedAs: team.StartedAs}
 	}
 
 	// Create players.
@@ -77,7 +78,7 @@ func (m *MatchData) Process() *MatchResult {
 
 		// Get starting team and append player.
 		team := result.Teams[getTeamIndex(player.Team.StartedAs)]
-		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, Name: player.Name})
+		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, TeamID: team.ID, Name: player.Name})
 	}
 
 	result.processRounds(m.Rounds)
@@ -176,7 +177,6 @@ func (m *MatchResult) Print() {
 // Persisting associations with composite primary keys does not seem to work.
 func (m *MatchResult) Persist() error {
 	err := DB.Transaction(func(tx *gorm.DB) error {
-
 		for _, team := range m.Teams {
 			for _, player := range team.Players {
 				if err := tx.Create(player).Error; err != nil {
