@@ -44,11 +44,10 @@ type PlayerResult struct {
 	CreatedAt    time.Time      `json:"-"`
 	UpdatedAt    time.Time      `json:"-"`
 	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
-	ID           uint           `json:"id" gorm:"primaryKey"`
-	MatchID      uint64         `json:"matchId"`
+	MatchID      uint64         `json:"matchId" gorm:"primaryKey;autoIncrement:false"`
+	SteamID      uint64         `json:"steamId" gorm:"primaryKey;autoIncrement:false"`
 	TeamID       common.Team    `json:"teamId"`
 	TeamResultID uint           `json:"teamResultId"`
-	SteamID      uint64         `json:"steamId"`
 	Name         string         `json:"name"`
 	Kills        byte           `json:"kills"`
 	EntryKills   byte           `json:"entryKills"`
