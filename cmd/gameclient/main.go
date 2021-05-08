@@ -64,7 +64,7 @@ func main() {
 			client.Auth.LogOn(myLoginInfo)
 		case *steam.LoggedOnEvent:
 			log.Info("logged on")
-			client.Social.SetPersonaState(steamlang.EPersonaState_Online)
+			client.Social.SetPersonaState(steamlang.EPersonaState_Invisible)
 			csgoClient = gamecoordinator.NewCSGO(client)
 			csgoClient.SetPlaying(true)
 			csgoClient.ShakeHands()
