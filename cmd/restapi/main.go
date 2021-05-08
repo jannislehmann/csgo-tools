@@ -47,7 +47,10 @@ func main() {
 
 	// By default it serves on :8080 unless a
 	// PORT environment variable was defined.
-	router.Run()
+	err := router.Run()
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
 // getMatches returns all matches from the database containing the metadata.
