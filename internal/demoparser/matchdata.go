@@ -17,21 +17,24 @@ type MatchResult struct {
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-	ID        uint64         `json:"id" gorm:"primaryKey;autoIncrement:false"`
+	MatchID   uint64         `json:"matchId" gorm:"primaryKey;autoIncrement:false"`
 	Map       string         `json:"map"`
 	Time      time.Time      `json:"time"`
 	Duration  time.Duration  `json:"duration"`
 	// 0 = T / 1 = CT
-	Teams []*TeamResult `json:"teams,omitempty" gorm:"foreignKey:ID"`
+	Teams []*TeamResult `json:"teams,omitempty" gorm:"foreignkey:MatchResultID"`
 }
 
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
-	gorm.Model      `json:"-"`
-	ID              byte            `json:"id" gorm:"primaryKey;autoIncrement:false"`
-	MatchID         uint64          `json:"-" gorm:"primaryKey;autoIncrement:false"`
-	StartedAs       common.Team     `json:"startedAs"`
-	Players         []*PlayerResult `json:"players" gorm:"foreignKey:SteamID"`
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	// TeamID describes the side the team started as.
+	TeamID          common.Team     `json:"teamId"`
+	MatchResultID   uint64          `json:"matchId"`
+	Players         []*PlayerResult `json:"players" gorm:"foreignkey:TeamResultID"`
 	Wins            byte            `json:"wins"`
 	PistolRoundWins byte            `json:"pistolRoundWins"`
 }
@@ -41,10 +44,11 @@ type PlayerResult struct {
 	CreatedAt    time.Time      `json:"-"`
 	UpdatedAt    time.Time      `json:"-"`
 	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
-	MatchID      uint64         `json:"match" gorm:"primaryKey;autoIncrement:false"`
-	TeamID       byte           `json:"team" gorm:"primaryKey;autoIncrement:false"`
-	SteamID      uint64         `json:"id,omitempty" gorm:"primaryKey;autoIncrement:false"`
-	Name         string         `json:"name,omitempty"`
+	ID           uint           `json:"id" gorm:"primaryKey"`
+	MatchID      uint64         `json:"matchId"`
+	TeamResultID common.Team    `json:"teamResultId"`
+	SteamID      uint64         `json:"steamId"`
+	Name         string         `json:"name"`
 	Kills        byte           `json:"kills"`
 	EntryKills   byte           `json:"entryKills"`
 	Headshots    byte           `json:"headshots"`
@@ -62,12 +66,12 @@ type PlayerResult struct {
 // Process processes the match data and creates more performance-based results per player in order to persist these in the database.
 func (m *MatchData) Process() *MatchResult {
 	// Create result.
-	result := &MatchResult{ID: m.ID, Map: m.Map, Duration: m.Duration, Time: m.Time, Teams: make([]*TeamResult, 2)}
+	result := &MatchResult{MatchID: m.ID, Map: m.Map, Duration: m.Duration, Time: m.Time, Teams: make([]*TeamResult, 2)}
 
 	// Create teams.
 	for _, team := range m.Teams {
 		// Could also use team.State.ID - 2 as they return the same as the enum.
-		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchID: m.ID, ID: byte(team.StartedAs), StartedAs: team.StartedAs}
+		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchResultID: m.ID, TeamID: team.StartedAs}
 	}
 
 	// Create players.
@@ -78,7 +82,7 @@ func (m *MatchData) Process() *MatchResult {
 
 		// Get starting team and append player.
 		team := result.Teams[getTeamIndex(player.Team.StartedAs)]
-		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, TeamID: team.ID, Name: player.Name})
+		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, TeamResultID: team.TeamID, Name: player.Name})
 	}
 
 	result.processRounds(m.Rounds)
@@ -174,29 +178,12 @@ func (m *MatchResult) Print() {
 }
 
 // Persist persists the match results in the database.
-// Persisting associations with composite primary keys does not seem to work.
 func (m *MatchResult) Persist() error {
-	err := DB.Transaction(func(tx *gorm.DB) error {
-		for _, team := range m.Teams {
-			for _, player := range team.Players {
-				if err := tx.Create(player).Error; err != nil {
-					return err
-				}
-			}
+	if err := DB.Create(m).Error; err != nil {
+		return err
+	}
 
-			if err := tx.Omit("Players").Create(team).Error; err != nil {
-				return err
-			}
-		}
-
-		if err := tx.Omit("Teams").Create(m).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return err
+	return nil
 }
 
 func getTeamIndex(team common.Team) byte {
