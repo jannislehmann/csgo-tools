@@ -22,7 +22,7 @@ type MatchResult struct {
 	Time      time.Time      `json:"time"`
 	Duration  time.Duration  `json:"duration"`
 	// 0 = T / 1 = CT
-	Teams []*TeamResult `json:"teams,omitempty" gorm:"foreignkey:MatchResultID"`
+	Teams []*TeamResult `json:"teams,omitempty" gorm:"foreignkey:MatchID"`
 }
 
 // TeamResult describes the players and wins for one team.
@@ -33,7 +33,7 @@ type TeamResult struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	// TeamID describes the side the team started as.
 	TeamID          common.Team     `json:"teamId"`
-	MatchResultID   uint64          `json:"matchId"`
+	MatchID         uint64          `json:"matchId"`
 	Players         []*PlayerResult `json:"players" gorm:"foreignkey:TeamResultID"`
 	Wins            byte            `json:"wins"`
 	PistolRoundWins byte            `json:"pistolRoundWins"`
@@ -46,7 +46,8 @@ type PlayerResult struct {
 	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
 	ID           uint           `json:"id" gorm:"primaryKey"`
 	MatchID      uint64         `json:"matchId"`
-	TeamResultID common.Team    `json:"teamResultId"`
+	TeamID       common.Team    `json:"teamId"`
+	TeamResultID uint           `json:"teamResultId"`
 	SteamID      uint64         `json:"steamId"`
 	Name         string         `json:"name"`
 	Kills        byte           `json:"kills"`
@@ -71,7 +72,7 @@ func (m *MatchData) Process() *MatchResult {
 	// Create teams.
 	for _, team := range m.Teams {
 		// Could also use team.State.ID - 2 as they return the same as the enum.
-		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchResultID: m.ID, TeamID: team.StartedAs}
+		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchID: m.ID, TeamID: team.StartedAs}
 	}
 
 	// Create players.
@@ -82,7 +83,7 @@ func (m *MatchData) Process() *MatchResult {
 
 		// Get starting team and append player.
 		team := result.Teams[getTeamIndex(player.Team.StartedAs)]
-		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, TeamResultID: team.TeamID, Name: player.Name})
+		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, TeamID: team.TeamID, Name: player.Name})
 	}
 
 	result.processRounds(m.Rounds)
