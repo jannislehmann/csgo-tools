@@ -14,59 +14,62 @@ var DB *gorm.DB
 
 // MatchResult holds meta data and the teams of one match.
 type MatchResult struct {
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	ID        uint64         `gorm:"primaryKey;autoIncrement:false"`
-	Map       string
-	Time      time.Time
-	Duration  time.Duration
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	MatchID   uint64         `json:"matchId" gorm:"primaryKey;autoIncrement:false"`
+	Map       string         `json:"map"`
+	Time      time.Time      `json:"time"`
+	Duration  time.Duration  `json:"duration"`
 	// 0 = T / 1 = CT
-	Teams []*TeamResult `gorm:"foreignKey:ID"`
+	Teams []*TeamResult `json:"teams,omitempty" gorm:"foreignkey:MatchID"`
 }
 
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
-	gorm.Model
-	TeamID          byte   `gorm:"primaryKey;autoIncrement:false"`
-	MatchID         uint64 `gorm:"primaryKey;autoIncrement:false"`
-	StartedAs       common.Team
-	Players         []*PlayerResult `gorm:"foreignKey:SteamID"`
-	Wins            byte
-	PistolRoundWins byte
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	// TeamID describes the side the team started as.
+	TeamID          common.Team     `json:"teamId" gorm:"primaryKey;autoIncrement:false"`
+	MatchID         uint64          `json:"-" gorm:"primaryKey;autoIncrement:false"`
+	Players         []*PlayerResult `json:"players" gorm:"foreignKey:TeamID,MatchID"`
+	Wins            byte            `json:"wins"`
+	PistolRoundWins byte            `json:"pistolRoundWins"`
 }
 
 // PlayerResult holds different performance metrics from one game.
 type PlayerResult struct {
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	DeletedAt    gorm.DeletedAt `gorm:"index"`
-	MatchID      uint64         `gorm:"primaryKey;autoIncrement:false"`
-	SteamID      uint64         `gorm:"primaryKey;autoIncrement:false"`
-	Name         string
-	Kills        byte
-	EntryKills   byte
-	Headshots    byte
-	Assists      byte
-	Deaths       byte
-	MVPs         byte
-	Won1v3       byte
-	Won1v4       byte
-	Won1v5       byte
-	RoundsWith3K byte
-	RoundsWith4K byte
-	RoundsWith5K byte
+	CreatedAt    time.Time      `json:"-"`
+	UpdatedAt    time.Time      `json:"-"`
+	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+	MatchID      uint64         `json:"-" gorm:"primaryKey;autoIncrement:false"`
+	SteamID      uint64         `json:"steamId" gorm:"primaryKey;autoIncrement:false"`
+	TeamID       common.Team    `json:"-"`
+	Name         string         `json:"name"`
+	Kills        byte           `json:"kills"`
+	EntryKills   byte           `json:"entryKills"`
+	Headshots    byte           `json:"headshots"`
+	Assists      byte           `json:"assists"`
+	Deaths       byte           `json:"deaths"`
+	MVPs         byte           `json:"mvps"`
+	Won1v3       byte           `json:"won1v3"`
+	Won1v4       byte           `json:"won1v4"`
+	Won1v5       byte           `json:"won1v5"`
+	RoundsWith3K byte           `json:"3k"`
+	RoundsWith4K byte           `json:"4k"`
+	RoundsWith5K byte           `json:"5k"`
 }
 
 // Process processes the match data and creates more performance-based results per player in order to persist these in the database.
 func (m *MatchData) Process() *MatchResult {
 	// Create result.
-	result := &MatchResult{ID: m.ID, Map: m.Map, Duration: m.Duration, Time: m.Time, Teams: make([]*TeamResult, 2)}
+	result := &MatchResult{MatchID: m.ID, Map: m.Map, Duration: m.Duration, Time: m.Time, Teams: make([]*TeamResult, 2)}
 
 	// Create teams.
 	for _, team := range m.Teams {
 		// Could also use team.State.ID - 2 as they return the same as the enum.
-		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchID: m.ID, TeamID: byte(team.StartedAs), StartedAs: team.StartedAs}
+		result.Teams[getTeamIndex(team.StartedAs)] = &TeamResult{MatchID: m.ID, TeamID: team.StartedAs}
 	}
 
 	// Create players.
@@ -77,7 +80,7 @@ func (m *MatchData) Process() *MatchResult {
 
 		// Get starting team and append player.
 		team := result.Teams[getTeamIndex(player.Team.StartedAs)]
-		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, Name: player.Name})
+		team.Players = append(team.Players, &PlayerResult{MatchID: m.ID, SteamID: player.SteamID, TeamID: team.TeamID, Name: player.Name})
 	}
 
 	result.processRounds(m.Rounds)
@@ -173,30 +176,12 @@ func (m *MatchResult) Print() {
 }
 
 // Persist persists the match results in the database.
-// Persisting associations with composite primary keys does not seem to work.
 func (m *MatchResult) Persist() error {
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	if err := DB.Create(m).Error; err != nil {
+		return err
+	}
 
-		for _, team := range m.Teams {
-			for _, player := range team.Players {
-				if err := tx.Create(player).Error; err != nil {
-					return err
-				}
-			}
-
-			if err := tx.Omit("Players").Create(team).Error; err != nil {
-				return err
-			}
-		}
-
-		if err := tx.Omit("Teams").Create(m).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return err
+	return nil
 }
 
 func getTeamIndex(team common.Team) byte {

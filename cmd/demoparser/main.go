@@ -88,8 +88,9 @@ func worker(matches <-chan entity.Match) {
 		err := parser.Parse(configData.DemosDir, demoFile)
 
 		if err != nil {
+			// TODO: Catch EOF error #41
 			log.Error(err)
-			return
+			continue
 		}
 
 		result := parser.Match.Process()
