@@ -30,11 +30,10 @@ type TeamResult struct {
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-	ID        uint           `json:"id" gorm:"primaryKey"`
 	// TeamID describes the side the team started as.
-	TeamID          common.Team     `json:"teamId"`
-	MatchID         uint64          `json:"matchId"`
-	Players         []*PlayerResult `json:"players" gorm:"foreignkey:TeamResultID"`
+	TeamID          common.Team     `json:"teamId" gorm:"primaryKey;autoIncrement:false"`
+	MatchID         uint64          `json:"matchId" gorm:"primaryKey;autoIncrement:false"`
+	Players         []*PlayerResult `json:"players" gorm:"foreignKey:TeamID,MatchID"`
 	Wins            byte            `json:"wins"`
 	PistolRoundWins byte            `json:"pistolRoundWins"`
 }
@@ -47,7 +46,6 @@ type PlayerResult struct {
 	MatchID      uint64         `json:"matchId" gorm:"primaryKey;autoIncrement:false"`
 	SteamID      uint64         `json:"steamId" gorm:"primaryKey;autoIncrement:false"`
 	TeamID       common.Team    `json:"teamId"`
-	TeamResultID uint           `json:"teamResultId"`
 	Name         string         `json:"name"`
 	Kills        byte           `json:"kills"`
 	EntryKills   byte           `json:"entryKills"`
