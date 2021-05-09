@@ -92,6 +92,16 @@ jobs:
           asset_path: ./bin/demoparser
           asset_name: demoparser-${{ github.ref }}
           asset_content_type: application/vnd.github.VERSION.raw
+      - name: Upload REST-API Release Asset
+        id: upload-restapi-release-asset  
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bin/restapi
+          asset_name: restapi-${{ github.ref }}
+          asset_content_type: application/vnd.github.VERSION.raw
 
   docker:
     name: Docker
