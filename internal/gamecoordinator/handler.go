@@ -7,8 +7,8 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/Cludch/csgo-tools/internal/entity"
-	"github.com/Cludch/csgo-tools/internal/gamecoordinator/protocol"
-	"github.com/Philipp15b/go-steam/protocol/gamecoordinator"
+	csgo "github.com/Philipp15b/go-steam/v2/csgo/protocol/protobuf"
+	"github.com/Philipp15b/go-steam/v2/protocol/gamecoordinator"
 )
 
 // DB is required when the package is initiated
@@ -19,7 +19,7 @@ var ch chan<- bool
 
 // HandleMatchList handles a gc message containing matches and tries to download those.
 func (c *CS) HandleMatchList(packet *gamecoordinator.GCPacket) error {
-	matchList := new(protocol.CMsgGCCStrike15V2_MatchList)
+	matchList := new(csgo.CMsgGCCStrike15V2_MatchList)
 	packet.ReadProtoMsg(matchList)
 
 	for _, match := range matchList.GetMatches() {

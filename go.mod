@@ -3,7 +3,7 @@ module github.com/Cludch/csgo-tools
 go 1.16
 
 require (
-	github.com/Philipp15b/go-steam v1.0.1-0.20210114153801-d651727c648f
+	github.com/Philipp15b/go-steam/v2 v2.0.2
 	github.com/gin-gonic/gin v1.7.1
 	github.com/go-playground/validator/v10 v10.6.0 // indirect
 	github.com/golang/protobuf v1.4.3

@@ -5,9 +5,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Cludch/csgo-tools/internal/gamecoordinator/protocol"
-	"github.com/Philipp15b/go-steam"
-	"github.com/Philipp15b/go-steam/protocol/gamecoordinator"
+	"github.com/Philipp15b/go-steam/v2"
+	csgo "github.com/Philipp15b/go-steam/v2/csgo/protocol/protobuf"
+	"github.com/Philipp15b/go-steam/v2/protocol/gamecoordinator"
 	"github.com/golang/protobuf/proto" //nolint //thinks break if we use the new package
 )
 
@@ -51,7 +51,7 @@ func (c *CS) ShakeHands() {
 	// Try to avoid not being ready on instant call of connection
 	time.Sleep(5 * time.Second)
 
-	c.Write(uint32(protocol.EGCBaseClientMsg_k_EMsgGCClientHello), &protocol.CMsgClientHello{
+	c.Write(uint32(csgo.EGCBaseClientMsg_k_EMsgGCClientHello), &csgo.CMsgClientHello{
 		Version: proto.Uint32(1),
 	})
 }
@@ -87,9 +87,9 @@ func (c *CS) emit(event interface{}) {
 func (c *CS) buildHandlerMap() {
 	c.handlers = HandlerMap{
 		// Welcome
-		uint32(protocol.EGCBaseClientMsg_k_EMsgGCClientWelcome): c.HandleClientWelcome,
+		uint32(csgo.EGCBaseClientMsg_k_EMsgGCClientWelcome): c.HandleClientWelcome,
 
 		// Match Making
-		uint32(protocol.ECsgoGCMsg_k_EMsgGCCStrike15_v2_MatchList): c.HandleMatchList,
+		uint32(csgo.ECsgoGCMsg_k_EMsgGCCStrike15_v2_MatchList): c.HandleMatchList,
 	}
 }

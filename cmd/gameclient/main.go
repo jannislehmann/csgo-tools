@@ -7,9 +7,9 @@ import (
 	"github.com/Cludch/csgo-tools/internal/entity"
 	"github.com/Cludch/csgo-tools/internal/gamecoordinator"
 	"github.com/Cludch/csgo-tools/pkg/demo"
-	"github.com/Philipp15b/go-steam"
-	"github.com/Philipp15b/go-steam/protocol/steamlang"
-	"github.com/Philipp15b/go-steam/totp"
+	"github.com/Philipp15b/go-steam/v2"
+	"github.com/Philipp15b/go-steam/v2/protocol/steamlang"
+	"github.com/Philipp15b/go-steam/v2/totp"
 	"gorm.io/gorm"
 )
 
