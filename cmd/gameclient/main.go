@@ -56,7 +56,11 @@ func main() {
 	myLoginInfo.TwoFactorCode = twoFactorCode
 
 	client := steam.NewClient()
-	client.Connect()
+	_, connectErr := client.Connect()
+	if connectErr != nil {
+		log.Panic(connectErr)
+	}
+
 	for event := range client.Events() {
 		switch e := event.(type) {
 		case *steam.ConnectedEvent:
