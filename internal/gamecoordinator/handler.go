@@ -14,6 +14,9 @@ import (
 // DB is required when the package is initiated
 var DB *gorm.DB
 
+// Channel is used to request demos one after another.
+var ch chan<- bool
+
 // HandleMatchList handles a gc message containing matches and tries to download those.
 func (c *CS) HandleMatchList(packet *gamecoordinator.GCPacket) error {
 	matchList := new(protocol.CMsgGCCStrike15V2_MatchList)
@@ -55,6 +58,8 @@ func (c *CS) HandleMatchList(packet *gamecoordinator.GCPacket) error {
 		}
 	}
 
+	ch <- true
+
 	return nil
 }
 
@@ -73,10 +78,21 @@ func (c *CS) HandleGCReady(e *GCReadyEvent) {
 			panic(err)
 		}
 
+		// Request demo after another and timeout a request after 5 seconds.
 		for _, match := range matches {
-			sc := match.ShareCode.Encoded
-			c.RequestMatch(sc)
-			time.Sleep(time.Second * 5)
+			go func(m entity.Match) {
+				checked := make(chan bool)
+
+				sc := m.ShareCode.Encoded
+				c.RequestMatch(sc)
+
+				select {
+				case ret := <-checked:
+					ch <- ret
+				case <-time.After(5 * time.Second):
+					ch <- false
+				}
+			}(match)
 		}
 
 		<-t.C
