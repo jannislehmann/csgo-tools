@@ -55,11 +55,11 @@ services:
       - ./configs:/app/configs
 
   db:
-    image: postgres:13
+    image: mongo:4.4
+    container_name: csgo_mongodb
     restart: unless-stopped
     ports:
-      - 127.0.0.1:5432:5432
-    environment:
-      POSTGRES_USER: csgo
-      POSTGRES_DB: csgo
+      - 127.0.0.1:27017:27017
     env_file: docker.env
+    volumes: 
+      - ./database:/data/db
