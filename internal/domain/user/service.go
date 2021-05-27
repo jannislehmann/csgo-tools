@@ -72,7 +72,11 @@ func (s *Service) AddSteamMatchHistoryAuthenticationCode(user *User, authCode st
 		return errors.New("invalid authentication code or last share code")
 	}
 
-	user.AddSteamMatchHistoryAuthenticationCode(authCode, shareCode)
+	err := user.AddSteamMatchHistoryAuthenticationCode(authCode, shareCode)
+	if err != nil {
+		return err
+	}
+
 	errAdd := s.repo.UpdateMatchAuthCode(user)
 	if errAdd != nil {
 		return errAdd
@@ -143,8 +147,10 @@ func (s *Service) QueryLatestShareCode(u *User) (*share_code.ShareCodeData, erro
 		if os.IsTimeout(err) {
 			return nil, errors.New("user: lost connection while querying the steam api for the latest sharecode")
 		}
-		s.UpdateSteamAPIUsage(u, false)
-		log.Warnf("disabled csgo user %d due to an error in fetching the share code", steamID)
+		updateErr := s.UpdateSteamAPIUsage(u, false)
+		if updateErr != nil {
+			log.Warnf("disabled csgo user %d due to an error in fetching the share code", steamID)
+		}
 		return nil, err
 	}
 

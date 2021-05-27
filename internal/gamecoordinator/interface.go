@@ -4,7 +4,7 @@ import (
 	"github.com/Cludch/csgo-tools/pkg/share_code"
 	"github.com/Philipp15b/go-steam/v2"
 	"github.com/Philipp15b/go-steam/v2/protocol/gamecoordinator"
-	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/proto" //nolint //thinks break if we use the new package
 )
 
 type UseCase interface {
