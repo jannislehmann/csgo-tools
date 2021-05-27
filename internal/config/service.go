@@ -7,13 +7,36 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var config Config
+type Service struct {
+	config *Config
+}
+
+func NewService() *Service {
+	service := Service{}
+
+	file := "./configs/config.json"
+	configFile, err := os.Open(file)
+	if err != nil {
+		configFile.Close()
+		log.Fatal(err)
+	}
+	jsonParser := json.NewDecoder(configFile)
+	service.config = &Config{}
+	err = jsonParser.Decode(service.GetConfig())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer configFile.Close()
+
+	service.setLoggingLevel()
+
+	return &service
+}
 
 // Config holds the application configuration.
 type Config struct {
 	DemosDir string          `json:"demosDir"`
 	Steam    *SteamConfig    `json:"steam"`
-	CSGO     []*CSGOConfig   `json:"csgo"`
 	Database *DatabaseConfig `json:"database"`
 	Debug    string          `json:"debug"`
 }
@@ -26,13 +49,6 @@ type SteamConfig struct {
 	TwoFactorSecret string `json:"twoFactorSecret"`
 }
 
-// CSGOConfig holds the accounts to watch.
-type CSGOConfig struct {
-	HistoryAPIKey  string `json:"matchHistoryAuthenticationCode"`
-	KnownMatchCode string `json:"knownMatchCode"`
-	SteamID        string `json:"steamId"` // should be uint64
-}
-
 // DatabaseConfig holds database connection information.
 type DatabaseConfig struct {
 	Host     string `json:"host"`
@@ -42,44 +58,28 @@ type DatabaseConfig struct {
 	Database string `json:"database"`
 }
 
-func init() {
-	file := "./configs/config.json"
-	configFile, err := os.Open(file)
-	if err != nil {
-		configFile.Close()
-		log.Fatal(err)
-	}
-	jsonParser := json.NewDecoder(configFile)
-	config = Config{}
-	err = jsonParser.Decode(&config)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer configFile.Close()
+// GetConfig returns the application configuration.
+func (s *Service) GetConfig() *Config {
+	return s.config
 }
 
-// GetConfiguration returns the application configuration.
-func GetConfiguration() *Config {
-	return &config
+// IsDebug returns whether the application is in debug mode.
+func (s *Service) IsDebug() bool {
+	return s.GetConfig().Debug == "true" || s.IsTrace()
+}
+
+// IsTrace returns whether the application should do extended debugging.
+func (s *Service) IsTrace() bool {
+	return s.GetConfig().Debug == "trace"
 }
 
 // SetLoggingLevel sets the logging level in relation to the level set in the config file.
-func (c *Config) SetLoggingLevel() {
-	if c.IsTrace() {
+func (s *Service) setLoggingLevel() {
+	if s.IsTrace() {
 		log.SetLevel(log.TraceLevel)
-	} else if c.IsDebug() {
+	} else if s.IsDebug() {
 		log.SetLevel(log.DebugLevel)
 	} else {
 		log.SetLevel(log.InfoLevel)
 	}
-}
-
-// IsDebug returns whether the application is in debug mode.
-func (c *Config) IsDebug() bool {
-	return config.Debug == "true" || config.IsTrace()
-}
-
-// IsTrace returns whether the application should do extended debugging.
-func (c *Config) IsTrace() bool {
-	return config.Debug == "trace"
 }

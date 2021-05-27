@@ -5,25 +5,22 @@ import (
 
 	"github.com/Cludch/csgo-tools/internal/config"
 	"github.com/Cludch/csgo-tools/internal/demoparser"
-	"github.com/Cludch/csgo-tools/internal/entity"
+	"github.com/Cludch/csgo-tools/internal/domain/entity"
+	"github.com/Cludch/csgo-tools/internal/domain/match"
 	"github.com/Cludch/csgo-tools/pkg/demo"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 const ParserVersion = 1
 
-var configData *config.Config
-var db *gorm.DB
+var configService *config.Service
+var matchService *match.Service
 
 // Sets up the global variables (config, db) and the logger.
-func init() {
-	db = entity.GetDatabase()
-	configData = config.GetConfiguration()
-	demoparser.ConfigData = configData
-	demoparser.DB = db
-
-	configData.SetLoggingLevel()
+func setup() {
+	configService = config.NewService()
+	db := entity.NewService(configService)
+	matchService = match.NewService(match.NewRepositoryMongo(db))
 
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
@@ -32,17 +29,12 @@ func init() {
 }
 
 func main() {
+	setup()
+
 	log.Info("starting demoparser")
 
-	demos := demo.ScanDemosDir(config.GetConfiguration().DemosDir)
-	for _, match := range demos {
-		entity.CreateDownloadedMatchFromMatchID(match.MatchID, match.Filename, match.MatchTime)
-	}
-
-	var nonParsedMatches []entity.Match
-
 	const numJobs = 5
-	matchQueue := make(chan entity.Match, numJobs)
+	matchQueue := make(chan *match.Match, numJobs)
 
 	// Start numJobs-times parallel workers.
 	for w := 1; w <= numJobs; w++ {
@@ -53,10 +45,10 @@ func main() {
 	t := time.NewTicker(time.Hour)
 	for {
 		// Get non-parsed matches from the db.
-		result := db.Find(&nonParsedMatches, "downloaded = true AND parser_version < ?", ParserVersion)
+		nonParsedMatches, err := matchService.GetParseableMatches(ParserVersion)
 
-		if err := result.Error; err != nil {
-			log.Panic(err)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		// Enqueue found matches.
@@ -69,36 +61,30 @@ func main() {
 }
 
 // Takes a match from the channel, parses and persists it.
-func worker(matches <-chan entity.Match) {
-	for match := range matches {
-		fileName := match.Filename
-		if fileName == "" {
+func worker(matches <-chan *match.Match) {
+	for m := range matches {
+		filename := m.Filename
+		if filename == "" {
 			return
 		}
 
-		// Remove old results if version is newer.
-		if match.ParserVersion < ParserVersion {
-			db.Delete(&demoparser.MatchResult{}, match.ID)
-			log.Debugf("Deleted match result for %d due to parser update", match.ID)
-		}
+		parser := demoparser.NewService(configService)
+		demoFile := &demo.Demo{ID: m.ID, MatchTime: m.CreatedAt, Filename: filename}
 
-		parser := &demoparser.DemoParser{}
-		demoFile := &demo.File{MatchID: match.ID, MatchTime: match.CreatedAt, Filename: fileName}
-
-		err := parser.Parse(configData.DemosDir, demoFile)
+		err := parser.Parse(configService.GetConfig().DemosDir, demoFile)
 
 		if err != nil {
 			log.Error(err)
 			continue
 		}
 
-		result := parser.Match.Process()
-		persistErr := result.Persist()
+		result := match.CreateResult(parser.Match)
+		persistErr := matchService.UpdateResult(m, result, ParserVersion)
 
-		if persistErr == nil && !configData.IsDebug() {
-			db.Model(&match).Updates(entity.Match{ParserVersion: ParserVersion})
+		if persistErr != nil {
+			log.Error(persistErr)
+		} else {
+			log.Infof("demoparser: finished parsing %s", filename)
 		}
-
-		log.Infof("Finished parsing %d", demoFile.MatchID)
 	}
 }

@@ -9,20 +9,19 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/Cludch/csgo-tools/internal/config"
-	"github.com/Cludch/csgo-tools/internal/entity"
-	"github.com/Cludch/csgo-tools/pkg/valveapi"
-	"gorm.io/gorm"
+	"github.com/Cludch/csgo-tools/internal/domain/entity"
+	"github.com/Cludch/csgo-tools/internal/domain/match"
+	"github.com/Cludch/csgo-tools/pkg/util"
 )
 
-var configData *config.Config
-var db *gorm.DB
+var configService *config.Service
+var matchService *match.Service
 
 // Sets up the global variables (config, db) and the logger.
-func init() {
-	db = entity.GetDatabase()
-	configData = config.GetConfiguration()
-
-	configData.SetLoggingLevel()
+func setup() {
+	configService = config.NewService()
+	db := entity.NewService(configService)
+	matchService = match.NewService(match.NewRepositoryMongo(db))
 
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
@@ -31,33 +30,42 @@ func init() {
 }
 
 func main() {
-	var nonDownloadedMatches []entity.Match
+	setup()
 
 	// Create a loop that checks for new download urls.
 	t := time.NewTicker(time.Minute)
 	for {
-		result := db.Find(&nonDownloadedMatches, "download_url != '' AND downloaded = false")
-
-		if err := result.Error; err != nil {
-			panic(err)
+		nonDownloadedMatches, err := matchService.GetDownloadableMatches()
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		// Iterate all matches and download them.
-		for _, match := range nonDownloadedMatches {
+		for _, m := range nonDownloadedMatches {
+			var filename = ""
+			status := m.Status
+
 			// Download match.
-			url := match.DownloadURL
-			err := valveapi.DownloadDemo(url, configData.DemosDir, match.MatchTime)
+			url := m.DownloadURL
+			err := util.DownloadDemo(url, configService.GetConfig().DemosDir, m.Time)
 			if err != nil {
 				if os.IsTimeout(err) {
 					log.Error("Lost connection", err)
 					continue
+				} else if util.IsDemoNotFoundError(err) {
+					status = match.Unavailable
 				}
+
 				log.Error(err)
+			} else {
+				filename = strings.Split(path.Base(url), ".")[0] + ".dem"
+				status = match.Downloaded
 			}
 
-			fileName := strings.Split(path.Base(url), ".")[0] + ".dem"
 			// Mark as downloaded and save file name.
-			db.Model(&match).Updates(entity.Match{Filename: fileName, Downloaded: true})
+			if updateErr := matchService.SetDownloaded(m, status, filename); updateErr != nil {
+				log.Error(updateErr)
+			}
 		}
 		<-t.C
 	}

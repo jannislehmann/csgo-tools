@@ -52,15 +52,15 @@ jobs:
           release_name: Version ${{ github.ref }}
           draft: true
           prerelease: false
-      - name: Upload apiclient Release Asset
-        id: upload-apiclient-release-asset  
+      - name: Upload ValveAPIClient Release Asset
+        id: upload-valveapiclient-release-asset  
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bin/apiclient
-          asset_name: apiclient-${{ github.ref }}
+          asset_path: ./bin/valveapiclient
+          asset_name: valveapiclient-${{ github.ref }}
           asset_content_type: application/vnd.github.VERSION.raw
       - name: Upload Demodownloader Release Asset
         id: upload-demodownloader-release-asset  

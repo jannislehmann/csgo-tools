@@ -1,7 +1,7 @@
 # Storage
 configs/config.json
-configs/db.sqlite
-demos/*
+database/
+demos/
 
 bin/
 docker.env

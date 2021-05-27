@@ -11,7 +11,7 @@ The tool saves all the match ids from the demos in the `demos` directory. This i
 
 The toolset currently features the following tools.
 
-### APIClient
+### valveapiclient
 
 The API client consumes Valve's game history API and saves the game share codes in the database.
 

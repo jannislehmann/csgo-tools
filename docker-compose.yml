@@ -1,10 +1,10 @@
 version: '3'
 
 services:
-  apiclient:
+  valveapiclient:
     image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
-    command: "apiclient"
-    container_name: apiclient
+    command: "./valveapiclient"
+    container_name: valveapiclient
     restart: unless-stopped
     depends_on:
       - db
@@ -13,7 +13,7 @@ services:
 
   demodownloader:
     image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
-    command: "demodownloader"
+    command: "./demodownloader"
     container_name: demodownloader
     restart: unless-stopped
     depends_on:
@@ -24,7 +24,7 @@ services:
 
   gameclient:
     image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
-    command: "gameclient"
+    command: "./gameclient"
     container_name: gameclient
     restart: unless-stopped
     depends_on:
@@ -35,7 +35,7 @@ services:
 
   demoparser:
     image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
-    command: "demoparser"
+    command: "./demoparser"
     container_name: demoparser
     restart: unless-stopped
     depends_on:
@@ -46,7 +46,7 @@ services:
   
   api:
     image: cludch/csgo-tools:latest
-    command: "restapi"
+    command: "./restapi"
     container_name: api
     restart: unless-stopped
     depends_on:
