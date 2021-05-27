@@ -7,6 +7,7 @@ import (
 	"github.com/Cludch/csgo-tools/internal/demoparser"
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
 	"github.com/Cludch/csgo-tools/internal/domain/match"
+	"github.com/Cludch/csgo-tools/internal/domain/player"
 	"github.com/Cludch/csgo-tools/pkg/demo"
 	log "github.com/sirupsen/logrus"
 )
@@ -15,12 +16,14 @@ const ParserVersion = 1
 
 var configService *config.Service
 var matchService *match.Service
+var playerService *player.Service
 
 // Sets up the global variables (config, db) and the logger.
 func setup() {
 	configService = config.NewService()
 	db := entity.NewService(configService)
 	matchService = match.NewService(match.NewRepositoryMongo(db))
+	playerService = player.NewService(player.NewRepositoryMongo(db))
 
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
@@ -79,12 +82,27 @@ func worker(matches <-chan *match.Match) {
 		}
 
 		result := match.CreateResult(parser.Match)
-		persistErr := matchService.UpdateResult(m, result, ParserVersion)
-
-		if persistErr != nil {
-			log.Error(persistErr)
-		} else {
-			log.Infof("demoparser: finished parsing %s", filename)
+		persistMatchErr := matchService.UpdateResult(m, result, ParserVersion)
+		if persistMatchErr != nil {
+			log.Error(persistMatchErr)
+			continue
 		}
+
+		for _, t := range m.Result.Teams {
+			for _, playerResult := range t.Players {
+				player, err := playerService.GetPlayer(playerResult.SteamID)
+				if err != nil {
+					log.Errorf("main: unable to query player: %s", err)
+					continue
+				}
+
+				playerResult.MatchID = m.ID
+				if persistPlayerErr := playerService.AddResult(player, playerResult); persistPlayerErr != nil {
+					log.Error(persistPlayerErr)
+				}
+			}
+		}
+
+		log.Infof("demoparser: finished parsing %s", filename)
 	}
 }

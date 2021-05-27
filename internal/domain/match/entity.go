@@ -5,6 +5,7 @@ import (
 
 	"github.com/Cludch/csgo-tools/internal/demoparser"
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
+	"github.com/Cludch/csgo-tools/internal/domain/player"
 	"github.com/Cludch/csgo-tools/pkg/share_code"
 	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/common"
 	log "github.com/sirupsen/logrus"
@@ -59,28 +60,10 @@ type MatchResult struct {
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
 	// TeamID describes the side the team started as.
-	TeamID          common.Team     `json:"id" bson:"id"`
-	Players         []*PlayerResult `json:"players" bson:"players"`
-	Wins            byte            `json:"wins" bson:"wins"`
-	PistolRoundWins byte            `json:"pistolRoundWins" bson:"pistolRoundWins"`
-}
-
-// PlayerResult holds different performance metrics from one game.
-type PlayerResult struct {
-	SteamID      uint64 `json:"steamId" bson:"steamId"`
-	Name         string `json:"name" bson:"name"`
-	Kills        byte   `json:"kills" bson:"kills"`
-	EntryKills   byte   `json:"entryKills" bson:"entryKills"`
-	Headshots    byte   `json:"headshots" bson:"headshots"`
-	Assists      byte   `json:"assists" bson:"assists"`
-	Deaths       byte   `json:"deaths" bson:"deaths"`
-	MVPs         byte   `json:"mvps" bson:"mvps"`
-	Won1v3       byte   `json:"won1v3" bson:"won1v3"`
-	Won1v4       byte   `json:"won1v4" bson:"won1v4"`
-	Won1v5       byte   `json:"won1v5" bson:"won1v5"`
-	RoundsWith3K byte   `json:"3k" bson:"3k"`
-	RoundsWith4K byte   `json:"4k" bson:"4k"`
-	RoundsWith5K byte   `json:"5k" bson:"5k"`
+	TeamID          common.Team            `json:"id" bson:"id"`
+	Players         []*player.PlayerResult `json:"players" bson:"players"`
+	Wins            byte                   `json:"wins" bson:"wins"`
+	PistolRoundWins byte                   `json:"pistolRoundWins" bson:"pistolRoundWins"`
 }
 
 func NewMatch(source Source) (*Match, error) {
@@ -106,14 +89,14 @@ func CreateResult(m *demoparser.MatchData) *MatchResult {
 	}
 
 	// Create players.
-	for _, player := range m.Players {
-		if player.SteamID == 0 {
-			log.Debugf("steamid 0 for %s in %d", player.Name, m.ID)
+	for _, p := range m.Players {
+		if p.SteamID == 0 {
+			log.Debugf("steamid 0 for %s in %d", p.Name, m.ID)
 		}
 
 		// Get starting team and append player.
-		team := result.Teams[demoparser.GetTeamIndex(player.Team.StartedAs, false)]
-		team.Players = append(team.Players, &PlayerResult{SteamID: player.SteamID, Name: player.Name})
+		team := result.Teams[demoparser.GetTeamIndex(p.Team.StartedAs, false)]
+		team.Players = append(team.Players, &player.PlayerResult{SteamID: p.SteamID, Name: p.Name})
 	}
 
 	result.processRounds(m.Rounds)
@@ -139,7 +122,7 @@ func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 			winner.PistolRoundWins++
 		}
 
-		playerKills := make(map[*PlayerResult]byte)
+		playerKills := make(map[*player.PlayerResult]byte)
 
 		// Process in round function in order to calculate all round information like amount of kills / round.
 		for _, kill := range round.Kills {
@@ -191,7 +174,7 @@ func (m *MatchResult) getTeam(team common.Team) *TeamResult {
 	return m.Teams[demoparser.GetTeamIndex(team, false)]
 }
 
-func (m *MatchResult) getPlayer(player *demoparser.Player) *PlayerResult {
+func (m *MatchResult) getPlayer(player *demoparser.Player) *player.PlayerResult {
 	if player == nil {
 		return nil
 	}

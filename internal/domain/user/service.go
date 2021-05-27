@@ -115,6 +115,7 @@ func (s *Service) SigninUsingSteam(id uint64, nickname string) (*User, error) {
 		if e != nil {
 			return nil, e
 		}
+		// TODO: Pass values to CreateUser
 		return u, s.CreateUser(u)
 	}
 
