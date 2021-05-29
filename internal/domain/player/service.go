@@ -1,6 +1,8 @@
 package player
 
 import (
+	"errors"
+
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
 )
 
@@ -47,7 +49,7 @@ func (s *Service) AddResult(p *Player, r *PlayerResult) error {
 
 	// Delete old result
 	dbResult, err := s.GetResult(p, matchId)
-	if err != nil {
+	if err != nil && !errors.Is(err, entity.ErrNotFound) {
 		return err
 	}
 

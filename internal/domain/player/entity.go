@@ -36,6 +36,7 @@ func NewPlayer(id uint64) (*Player, error) {
 	m := &Player{
 		ID:        id,
 		CreatedAt: time.Now(),
+		Results:   []*PlayerResult{},
 	}
 
 	return m, nil

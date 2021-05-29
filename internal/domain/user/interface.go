@@ -25,7 +25,8 @@ type Repository interface {
 
 // UseCase defines the user service functions.
 type UseCase interface {
-	CreateUser(*User) error
+	CreateUserUsingSteam(id uint64, nickname string) (*User, error)
+	CreateUserUsingFaceit(id entity.ID, nickname string) (*User, error)
 
 	GetUser(entity.ID) (*User, error)
 	GetUserBySteamId(uint64) (*User, error)

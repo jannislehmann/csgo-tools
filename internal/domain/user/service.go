@@ -40,7 +40,35 @@ func (s *Service) GetUsersWithAuthenticationCode() ([]*User, error) {
 	return s.repo.FindUsersContainingAuthenticationCode()
 }
 
-func (s *Service) CreateUser(u *User) error {
+func (s *Service) CreateUserUsingSteam(id uint64, nickname string) (*User, error) {
+	u, err := NewUserUsingSteam(id, nickname)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.createUser(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}
+
+func (s *Service) CreateUserUsingFaceit(id entity.ID, nickname string) (*User, error) {
+	u, err := NewUserUsingFaceit(id, nickname)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.createUser(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}
+
+func (s *Service) createUser(u *User) error {
 	dbUser, _ := s.GetUser(u.ID)
 	if dbUser != nil {
 		return errors.New("user with id already exists")
@@ -109,30 +137,21 @@ func (s *Service) UpdateLatestShareCode(u *User, sc *share_code.ShareCodeData) e
 }
 
 func (s *Service) SigninUsingSteam(id uint64, nickname string) (*User, error) {
-	u, err := s.repo.FindBySteamId(id)
-	if u == nil {
-		u, e := NewUserUsingSteam(id, nickname)
-		if e != nil {
-			return nil, e
-		}
-		// TODO: Pass values to CreateUser
-		return u, s.CreateUser(u)
+	_, err := s.repo.FindBySteamId(id)
+	if err != nil && errors.Is(err, entity.ErrNotFound) {
+		return nil, err
 	}
 
-	return u, err
+	return s.CreateUserUsingSteam(id, nickname)
 }
 
 func (s *Service) SigninUsingFaceit(id entity.ID, nickname string) (*User, error) {
-	u, err := s.repo.FindByFaceitId(id)
-	if u == nil {
-		u, e := NewUserUsingFaceit(id, nickname)
-		if e != nil {
-			return nil, e
-		}
-		return u, s.CreateUser(u)
+	_, err := s.repo.FindByFaceitId(id)
+	if err != nil && errors.Is(err, entity.ErrNotFound) {
+		return nil, err
 	}
 
-	return u, err
+	return s.CreateUserUsingFaceit(id, nickname)
 }
 
 func (s *Service) QueryLatestShareCode(u *User) (*share_code.ShareCodeData, error) {
