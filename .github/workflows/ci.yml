@@ -107,8 +107,8 @@ jobs:
     name: Docker
     runs-on: ubuntu-20.04
     needs: build
-    # Run on tag
-    if: github.ref == 'refs/heads/main' || startsWith( github.ref, 'refs/tags/')
+    # Run on tag or main/develop branch
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith( github.ref, 'refs/tags/')
     steps:
       - name: Checkout
         uses: actions/checkout@v2
