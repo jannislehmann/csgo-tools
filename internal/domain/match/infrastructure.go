@@ -150,11 +150,18 @@ func (r *RepositoryMongo) UpdateStatus(m *Match) error {
 
 func (r *RepositoryMongo) UpdateDownloaded(m *Match) error {
 	filter := bson.M{"_id": m.ID}
+	var update primitive.D
 
-	update := bson.D{primitive.E{Key: "$set", Value: bson.D{
-		primitive.E{Key: "status", Value: m.Status},
-		primitive.E{Key: "filename", Value: m.Filename},
-	}}}
+	if m.Filename != "" {
+		update = bson.D{primitive.E{Key: "$set", Value: bson.D{
+			primitive.E{Key: "status", Value: m.Status},
+			primitive.E{Key: "filename", Value: m.Filename},
+		}}}
+	} else {
+		update = bson.D{primitive.E{Key: "$set", Value: bson.D{
+			primitive.E{Key: "status", Value: m.Status},
+		}}}
+	}
 
 	t := &Match{}
 	return r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t)
