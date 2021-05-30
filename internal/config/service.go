@@ -77,8 +77,10 @@ func (s *Service) IsTrace() bool {
 func (s *Service) setLoggingLevel() {
 	if s.IsTrace() {
 		log.SetLevel(log.TraceLevel)
+		log.SetReportCaller(true)
 	} else if s.IsDebug() {
 		log.SetLevel(log.DebugLevel)
+		log.SetReportCaller(true)
 	} else {
 		log.SetLevel(log.InfoLevel)
 	}

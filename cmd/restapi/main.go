@@ -9,18 +9,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var configurationService *config.Service
+var configService *config.Service
 var matchService *match.Service
 var playerService *player.Service
 
 // Sets up the global variables (config, db) and the logger.
 func setup() {
-	configurationService = config.NewService()
-	db := entity.NewService(configurationService)
+	configService = config.NewService()
+	db := entity.NewService(configService)
 	matchService = match.NewService(match.NewRepositoryMongo(db))
 	playerService = player.NewService(player.NewRepositoryMongo(db))
 
-	if !configurationService.IsDebug() {
+	if !configService.IsDebug() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

@@ -11,7 +11,7 @@ import (
 	"github.com/Philipp15b/go-steam/v2"
 )
 
-var configurationService *config.Service
+var configService *config.Service
 var matchService *match.Service
 var steamService *steam_client.Service
 var gamecoordinatorService *gamecoordinator.Service
@@ -22,8 +22,8 @@ func setup() {
 		log.Error(err)
 	}
 
-	configurationService = config.NewService()
-	db := entity.NewService(configurationService)
+	configService = config.NewService()
+	db := entity.NewService(configService)
 
 	matchService = match.NewService(match.NewRepositoryMongo(db))
 	gamecoordinatorService = gamecoordinator.NewService(matchService)
@@ -38,6 +38,6 @@ func setup() {
 func main() {
 	setup()
 
-	configData := configurationService.GetConfig()
+	configData := configService.GetConfig()
 	steamService.Connect(configData.Steam.Username, configData.Steam.Password, configData.Steam.TwoFactorSecret)
 }
