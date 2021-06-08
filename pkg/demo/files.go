@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
-	log "github.com/sirupsen/logrus"
 )
 
 // Demo holds meta information about a demo file.
@@ -17,7 +16,7 @@ type Demo struct {
 }
 
 // ScanDemosDir scans the demos dir and returns all match ids.
-func ScanDemosDir(path string) []*Demo {
+func ScanDemosDir(path string) ([]*Demo, error) {
 	var demos []*Demo
 
 	err := filepath.Walk(path,
@@ -41,9 +40,7 @@ func ScanDemosDir(path string) []*Demo {
 			modTime := time.Now()
 
 			stats, err := os.Stat(path)
-			if err != nil {
-				log.Errorf("Unable to read file stats for %v", fileName)
-			} else {
+			if err == nil {
 				modTime = stats.ModTime()
 			}
 
@@ -53,8 +50,8 @@ func ScanDemosDir(path string) []*Demo {
 			return nil
 		})
 	if err != nil {
-		log.Error(err)
+		return nil, nil
 	}
 
-	return demos
+	return demos, nil
 }

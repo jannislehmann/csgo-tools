@@ -2,12 +2,11 @@ package valveapi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // MatchResponse contains information about the latest match.
@@ -23,7 +22,8 @@ type InvalidMatchHistoryCredentials struct {
 }
 
 func (e *InvalidMatchHistoryCredentials) Error() string {
-	return fmt.Sprintf("Invalid match history credentials for steam id %v.", e.SteamID)
+	const msg = "Invalid match history credentials for steam id %v."
+	return fmt.Sprintf(msg, e.SteamID)
 }
 
 // GetNextMatch returns the next match's share code.
@@ -32,7 +32,7 @@ func GetNextMatch(steamAPIKey string, steamID uint64, historyAuthenticationCode 
 	// Get latest match
 	u, err := url.Parse("https://api.steampowered.com/ICSGOPlayers_730/GetNextMatchSharingCode/v1")
 	if err != nil {
-		log.Error(err)
+		return "", errors.New("valveapi: unable to parse url")
 	}
 
 	steamIDString := strconv.FormatUint(steamID, 10)
@@ -50,7 +50,6 @@ func GetNextMatch(steamAPIKey string, steamID uint64, historyAuthenticationCode 
 	// Request match code.
 	r, err := http.Get(u.String())
 	if err != nil {
-		log.Error(err)
 		return "", err
 	}
 
@@ -67,11 +66,8 @@ func GetNextMatch(steamAPIKey string, steamID uint64, historyAuthenticationCode 
 		return "", nil
 	}
 
-	err = json.NewDecoder(r.Body).Decode(matchResponse)
-
-	if err != nil {
+	if err = json.NewDecoder(r.Body).Decode(matchResponse); err != nil {
 		r.Body.Close()
-		log.Error(err)
 		return "", err
 	}
 

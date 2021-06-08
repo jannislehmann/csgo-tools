@@ -25,7 +25,8 @@ type errDemoNotFound struct {
 }
 
 func (e errDemoNotFound) Error() string {
-	return fmt.Sprintf("demo no longer downloadable: %s", e.URL)
+	const msg = "demo no longer downloadable: %s"
+	return fmt.Sprintf(msg, e.URL)
 }
 
 func IsDemoNotFoundError(err error) bool {
@@ -81,8 +82,7 @@ func DownloadDemo(url string, demoDir string, lastModified time.Time) error {
 	}
 
 	// Decompress and write to file.
-	_, err = io.Copy(out, cr)
-	if err != nil {
+	if _, err = io.Copy(out, cr); err != nil {
 		return err
 	}
 
@@ -90,13 +90,11 @@ func DownloadDemo(url string, demoDir string, lastModified time.Time) error {
 	out.Close()
 
 	// Update file modified information.
-	err = os.Chtimes(filePath, lastModified, lastModified)
-	if err != nil {
-		log.Warnf("unable to set correct last modified date for demo %v", fileName)
+	if err = os.Chtimes(filePath, lastModified, lastModified); err != nil {
+		const msg = "unable to set correct last modified date for demo %v"
+		log.Warnf(msg, fileName)
 		log.Error(err)
 	}
-
-	log.Infof("downloaded demo %v", fileName)
 
 	return nil
 }
