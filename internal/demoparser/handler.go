@@ -130,14 +130,3 @@ func (s *Service) handleKill(e events.Kill) {
 
 	round.Kills = append(round.Kills, kill)
 }
-
-func (s *Service) debug(message string) {
-	if s.configurationService.IsTrace() {
-		log.WithFields(log.Fields{
-			"Match": s.Match.ID,
-			"Round": s.CurrentRound,
-		}).Trace(message)
-	} else {
-		log.Debug(message)
-	}
-}

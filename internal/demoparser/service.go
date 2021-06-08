@@ -119,6 +119,20 @@ func (s *Service) Parse(dir string, demoFile *demo.Demo) error {
 	return s.parser.ParseToEnd()
 }
 
+// AddPlayer adds a player to the game and returns the pointer.
+func (s *Service) AddPlayer(player *common.Player) *Player {
+	teamID := GetTeamIndex(player.Team, s.SidesSwitched)
+	teams := s.Match.Teams
+	teamPlayers := teams[teamID].Players
+
+	customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
+
+	teams[teamID].Players = append(teamPlayers, customPlayer)
+	s.Match.Players = append(s.Match.Players, customPlayer)
+
+	return customPlayer
+}
+
 func (s *Service) getPlayer(player *common.Player) (*Player, error) {
 	if player.IsBot {
 		return nil, errors.New("Player is a bot")
@@ -139,16 +153,13 @@ func (s *Service) getPlayer(player *common.Player) (*Player, error) {
 	return nil, errors.New("Player not found in local match struct " + strconv.FormatUint(player.SteamID64, 10))
 }
 
-// AddPlayer adds a player to the game and returns the pointer.
-func (s *Service) AddPlayer(player *common.Player) *Player {
-	teamID := GetTeamIndex(player.Team, s.SidesSwitched)
-	teams := s.Match.Teams
-	teamPlayers := teams[teamID].Players
-
-	customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
-
-	teams[teamID].Players = append(teamPlayers, customPlayer)
-	s.Match.Players = append(s.Match.Players, customPlayer)
-
-	return customPlayer
+func (s *Service) debug(message string) {
+	if s.configurationService.IsTrace() {
+		log.WithFields(log.Fields{
+			"Match": s.Match.ID,
+			"Round": s.CurrentRound,
+		}).Trace(message)
+	} else {
+		log.Debug(message)
+	}
 }
