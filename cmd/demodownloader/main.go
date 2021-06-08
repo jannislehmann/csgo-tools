@@ -47,8 +47,7 @@ func main() {
 
 			// Download match.
 			url := m.DownloadURL
-			err := util.DownloadDemo(url, configService.GetConfig().DemosDir, m.Time)
-			if err != nil {
+			if err := util.DownloadDemo(url, configService.GetConfig().DemosDir, m.Time); err != nil {
 				if os.IsTimeout(err) {
 					log.Error("Lost connection", err)
 					continue
@@ -60,11 +59,14 @@ func main() {
 			} else {
 				filename = strings.Split(path.Base(url), ".")[0] + ".dem"
 				status = match.Downloaded
+
+				const msg = "downloaded demo %v"
+				log.Infof(msg, m.Filename)
 			}
 
 			// Mark as downloaded and save file name.
-			if updateErr := matchService.SetDownloaded(m, status, filename); updateErr != nil {
-				log.Error(updateErr)
+			if err := matchService.SetDownloaded(m, status, filename); err != nil {
+				log.Error(err)
 			}
 		}
 		<-t.C

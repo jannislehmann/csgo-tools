@@ -162,29 +162,37 @@ func (s *Service) QueryLatestShareCode(u *User) (*share_code.ShareCodeData, erro
 	steamID := u.Steam.ID
 	shareCode, err := valveapi.GetNextMatch(s.configurationService.GetConfig().Steam.SteamAPIKey, steamID, u.Steam.AuthCode, u.Steam.LastShareCode)
 
-	// Disable user on error
+	// Disable user on error.
 	if err != nil {
 		if os.IsTimeout(err) {
 			return nil, errors.New("user: lost connection while querying the steam api for the latest sharecode")
+		} else if s.configurationService.IsDebug() {
+			const msg = "user.service: unable to query next valve match: %s"
+			log.Errorf(msg, err)
 		}
+
 		updateErr := s.UpdateSteamAPIUsage(u, false)
 		if updateErr != nil {
-			log.Warnf("disabled csgo user %d due to an error in fetching the share code", steamID)
+			const msg = "disabled csgo user %d due to an error (%t) in fetching the share code"
+			log.Warnf(msg, steamID, err)
 		}
 		return nil, err
 	}
 
 	// No new match.
 	if shareCode == "" {
-		log.Debugf("no new match found for %d", steamID)
+		const msg = "no new match found for %d"
+		log.Debugf(msg, steamID)
 		return nil, nil
 	}
 
-	log.Infof("found match share code %v for %d", shareCode, u.Steam.ID)
+	const msg = "found match share code %v for %d"
+	log.Infof(msg, shareCode, u.Steam.ID)
 
 	sc, err := share_code.Decode(shareCode)
 	if err != nil {
-		return nil, fmt.Errorf("invalid share code %s", sc.Encoded)
+		const msg = "invalid share code %s"
+		return nil, fmt.Errorf(msg, sc.Encoded)
 	}
 
 	return sc, nil

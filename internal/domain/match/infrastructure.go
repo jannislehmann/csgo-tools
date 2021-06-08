@@ -49,8 +49,7 @@ func (r *RepositoryMongo) createIndex() {
 		},
 	}
 
-	_, err := collection.Indexes().CreateMany(context.Background(), models, opts)
-	if err != nil {
+	if _, err := collection.Indexes().CreateMany(context.Background(), models, opts); err != nil {
 		log.Error(err)
 	}
 }
@@ -58,47 +57,55 @@ func (r *RepositoryMongo) createIndex() {
 func (r *RepositoryMongo) Create(m *Match) error {
 	collection := r.getCollection()
 	_, err := collection.InsertOne(ctx, m)
-	return err
+	return handleError(err)
 }
 
 func (r *RepositoryMongo) Find(id entity.ID) (*Match, error) {
 	filterConfig := bson.M{"_id": id}
-	return r.filterOne(filterConfig)
+	m, err := r.filterOne(filterConfig)
+	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) FindByFaceitId(id entity.ID) (*Match, error) {
 	filterConfig := bson.M{"faceitMatchId": id}
-	return r.filterOne(filterConfig)
+	m, err := r.filterOne(filterConfig)
+	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) FindByValveId(id uint64) (*Match, error) {
 	filterConfig := bson.M{"shareCode.matchId": id}
-	return r.filterOne(filterConfig)
+	m, err := r.filterOne(filterConfig)
+	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) FindByValveOutcomeId(id uint64) (*Match, error) {
 	filterConfig := bson.D{{Key: "shareCode.outcomeId", Value: id}}
-	return r.filterOne(filterConfig)
+	m, err := r.filterOne(filterConfig)
+	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) List() ([]*Match, error) {
 	filterConfig := bson.M{}
-	return r.filter(filterConfig)
+	m, err := r.filter(filterConfig)
+	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) ListDownloadedMatches() ([]*Match, error) {
 	filterConfig := bson.M{"status": Downloaded}
-	return r.filter(filterConfig)
+	m, err := r.filter(filterConfig)
+	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) ListDownloadableMatches() ([]*Match, error) {
 	filterConfig := bson.M{"status": Downloadable}
-	return r.filter(filterConfig)
+	m, err := r.filter(filterConfig)
+	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) ListParsedMatches() ([]*Match, error) {
 	filterConfig := bson.M{"status": Parsed}
-	return r.filter(filterConfig)
+	m, err := r.filter(filterConfig)
+	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) ListValveMatchesMissingDownloadUrl() ([]*Match, error) {
@@ -108,7 +115,8 @@ func (r *RepositoryMongo) ListValveMatchesMissingDownloadUrl() ([]*Match, error)
 			{"status": Created},
 		},
 	}
-	return r.filter(filterConfig)
+	m, err := r.filter(filterConfig)
+	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) Delete(id entity.ID) error {
@@ -116,11 +124,11 @@ func (r *RepositoryMongo) Delete(id entity.ID) error {
 
 	res, err := r.getCollection().DeleteOne(ctx, filter)
 	if err != nil {
-		return err
+		return handleError(err)
 	}
 
 	if res.DeletedCount == 0 {
-		return errors.New("no match was deleted")
+		log.Debug("match: no match was deleted")
 	}
 
 	return nil
@@ -134,7 +142,7 @@ func (r *RepositoryMongo) UpdateResult(m *Match) error {
 	}}}
 
 	t := &Match{}
-	return r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t)
+	return handleError(r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t))
 }
 
 func (r *RepositoryMongo) UpdateStatus(m *Match) error {
@@ -145,7 +153,7 @@ func (r *RepositoryMongo) UpdateStatus(m *Match) error {
 	}}}
 
 	t := &Match{}
-	return r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t)
+	return handleError(r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t))
 }
 
 func (r *RepositoryMongo) UpdateDownloaded(m *Match) error {
@@ -164,7 +172,7 @@ func (r *RepositoryMongo) UpdateDownloaded(m *Match) error {
 	}
 
 	t := &Match{}
-	return r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t)
+	return handleError(r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t))
 }
 
 func (r *RepositoryMongo) UpdateDownloadInformation(m *Match) error {
@@ -177,7 +185,7 @@ func (r *RepositoryMongo) UpdateDownloadInformation(m *Match) error {
 	}}}
 
 	t := &Match{}
-	return r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t)
+	return handleError(r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t))
 }
 
 func (r *RepositoryMongo) getCollection() *mongo.Collection {
@@ -188,12 +196,7 @@ func (r *RepositoryMongo) filterOne(filter interface{}) (*Match, error) {
 	var m *Match
 	res := r.getCollection().FindOne(ctx, filter)
 	if err := res.Decode(&m); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return m, entity.ErrNotFound
-		} else {
-			log.Debugf("match.infrastructure: %s", err)
-			return m, entity.ErrUnknownInfrastructureError
-		}
+		return nil, handleError(err)
 	}
 
 	return m, nil
@@ -209,15 +212,14 @@ func (r *RepositoryMongo) filter(filter interface{}) ([]*Match, error) {
 
 	for cur.Next(ctx) {
 		var m Match
-		err := cur.Decode(&m)
-		if err != nil {
+		if err := handleError(cur.Decode(&m)); err != nil {
 			return matches, err
 		}
 
 		matches = append(matches, &m)
 	}
 
-	if err := cur.Err(); err != nil {
+	if err := handleError(cur.Err()); err != nil {
 		return matches, err
 	}
 
@@ -228,4 +230,18 @@ func (r *RepositoryMongo) filter(filter interface{}) ([]*Match, error) {
 	}
 
 	return matches, nil
+}
+
+func handleError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return entity.ErrNotFound
+	} else {
+		const msg = "match.infrastructure: %s"
+		log.Debugf(msg, err)
+		return entity.ErrUnknownInfrastructureError
+	}
 }

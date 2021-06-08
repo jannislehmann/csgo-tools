@@ -7,9 +7,12 @@ import (
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
 	"github.com/Cludch/csgo-tools/internal/domain/player"
 	"github.com/Cludch/csgo-tools/pkg/share_code"
+	"github.com/go-playground/validator"
 	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/common"
 	log "github.com/sirupsen/logrus"
 )
+
+var validate = validator.New()
 
 // Source describes the source of a demo / match.
 type Source string
@@ -37,33 +40,33 @@ const (
 type Match struct {
 	ID            entity.ID                 `json:"id" bson:"_id,omitempty"`
 	CreatedAt     time.Time                 `json:"-" bson:"createdAt"`
-	Source        Source                    `json:"source" bson:"source"`
-	Status        Status                    `json:"status" bson:"status"`
+	Source        Source                    `json:"source" bson:"source" validate:"required"`
+	Status        Status                    `json:"status" bson:"status" validate:"required"`
 	Time          time.Time                 `json:"time" bson:"time,omitempty"`
 	Filename      string                    `json:"filename" bson:"filename,omitempty"`
 	DownloadURL   string                    `json:"url" bson:"url,omitempty"`
 	ShareCode     *share_code.ShareCodeData `json:"shareCode" bson:"shareCode,omitempty"`
 	FaceitMatchId string                    `json:"faceitMatchId" bson:"faceitMatchId,omitempty"`
-	Result        *MatchResult              `json:"result" bson:"result,omitempty"`
+	Result        *MatchResult              `json:"result" bson:"result,omitempty" validation:"dive"`
 }
 
 // MatchResult holds meta data and the teams of one match.
 type MatchResult struct {
-	ParserVersion byte          `json:"parserVersion" bson:"parserVersion"`
-	Map           string        `json:"map" bson:"map"`
-	Time          time.Time     `json:"time" bson:"time"`
-	Duration      time.Duration `json:"duration" bson:"duration"`
+	ParserVersion byte          `json:"parserVersion" bson:"parserVersion" validate:"required,gt=0"`
+	Map           string        `json:"map" bson:"map" validate:"required"`
+	Time          time.Time     `json:"time" bson:"time" validate:"required"`
+	Duration      time.Duration `json:"duration" bson:"duration" validate:"required"`
 	// 0 = T / 1 = CT
-	Teams []*TeamResult `json:"teams"`
+	Teams []*TeamResult `json:"teams" validate:"required,dive"`
 }
 
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
 	// TeamID describes the side the team started as.
-	TeamID          common.Team            `json:"id" bson:"id"`
-	Players         []*player.PlayerResult `json:"players" bson:"players"`
-	Wins            byte                   `json:"wins" bson:"wins"`
-	PistolRoundWins byte                   `json:"pistolRoundWins" bson:"pistolRoundWins"`
+	TeamID          common.Team            `json:"id" bson:"id" validate:"required,gt=0"`
+	Players         []*player.PlayerResult `json:"players" bson:"players" validate:"required,dive"`
+	Wins            byte                   `json:"wins" bson:"wins" validate:"required"`
+	PistolRoundWins byte                   `json:"pistolRoundWins" bson:"pistolRoundWins" validate:"required"`
 }
 
 func NewMatch(source Source) (*Match, error) {
@@ -74,6 +77,9 @@ func NewMatch(source Source) (*Match, error) {
 		Status:    Created,
 	}
 
+	if err := m.Validate(); err != nil {
+		return nil, err
+	}
 	return m, nil
 }
 
@@ -91,7 +97,8 @@ func CreateResult(m *demoparser.MatchData) *MatchResult {
 	// Create players.
 	for _, p := range m.Players {
 		if p.SteamID == 0 {
-			log.Debugf("steamid 0 for %s in %d", p.Name, m.ID)
+			const msg = "match: steamid 0 for %s in %d"
+			log.Debugf(msg, p.Name, m.ID)
 		}
 
 		// Get starting team and append player.
@@ -106,7 +113,6 @@ func CreateResult(m *demoparser.MatchData) *MatchResult {
 
 func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 	for index, round := range rounds {
-
 		// MVP can be nil when the round ended because one team surrendered.
 		mvp := m.getPlayer(round.MVP)
 		if mvp != nil {
@@ -189,6 +195,14 @@ func (m *MatchResult) getPlayer(player *demoparser.Player) *player.PlayerResult 
 				return resultPlayer
 			}
 		}
+	}
+
+	return nil
+}
+
+func (m *Match) Validate() error {
+	if err := validate.Struct(m).(validator.ValidationErrors); err != nil {
+		return err
 	}
 
 	return nil

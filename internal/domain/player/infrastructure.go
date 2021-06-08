@@ -29,12 +29,13 @@ func NewRepositoryMongo(db *entity.Service) *RepositoryMongo {
 func (r *RepositoryMongo) Create(m *Player) error {
 	collection := r.getCollection()
 	_, err := collection.InsertOne(ctx, m)
-	return err
+	return handleError(err)
 }
 
 func (r *RepositoryMongo) Find(id uint64) (*Player, error) {
 	filterConfig := bson.M{"_id": id}
-	return r.filterOne(filterConfig)
+	p, err := r.filterOne(filterConfig)
+	return p, handleError(err)
 }
 
 func (r *RepositoryMongo) FindByFaceitId(id entity.ID) (*Player, error) {
@@ -44,7 +45,8 @@ func (r *RepositoryMongo) FindByFaceitId(id entity.ID) (*Player, error) {
 
 func (r *RepositoryMongo) List() ([]*Player, error) {
 	filterConfig := bson.M{}
-	return r.filter(filterConfig)
+	p, err := r.filter(filterConfig)
+	return p, handleError(err)
 }
 
 func (r *RepositoryMongo) AddResult(p *Player, result *PlayerResult) error {
@@ -55,7 +57,7 @@ func (r *RepositoryMongo) AddResult(p *Player, result *PlayerResult) error {
 	}}}
 
 	t := &Player{}
-	return r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t)
+	return handleError(r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t))
 }
 
 func (r *RepositoryMongo) DeleteResult(p *Player, matchId entity.ID) error {
@@ -66,7 +68,7 @@ func (r *RepositoryMongo) DeleteResult(p *Player, matchId entity.ID) error {
 	}}}
 
 	t := &Player{}
-	return r.getCollection().FindOneAndUpdate(ctx, filter, pull).Decode(t)
+	return handleError(r.getCollection().FindOneAndUpdate(ctx, filter, pull).Decode(t))
 }
 
 func (r *RepositoryMongo) getCollection() *mongo.Collection {
@@ -77,12 +79,7 @@ func (r *RepositoryMongo) filterOne(filter interface{}) (*Player, error) {
 	var p *Player
 	res := r.getCollection().FindOne(ctx, filter)
 	if err := res.Decode(&p); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return p, entity.ErrNotFound
-		} else {
-			log.Debugf("player.infrastructure: %s", err)
-			return p, entity.ErrUnknownInfrastructureError
-		}
+		return nil, handleError(err)
 	}
 
 	return p, nil
@@ -98,15 +95,14 @@ func (r *RepositoryMongo) filter(filter interface{}) ([]*Player, error) {
 
 	for cur.Next(ctx) {
 		var m Player
-		err := cur.Decode(&m)
-		if err != nil {
+		if err := handleError(cur.Decode(&m)); err != nil {
 			return players, err
 		}
 
 		players = append(players, &m)
 	}
 
-	if err := cur.Err(); err != nil {
+	if err := handleError(cur.Err()); err != nil {
 		return players, err
 	}
 
@@ -117,4 +113,17 @@ func (r *RepositoryMongo) filter(filter interface{}) ([]*Player, error) {
 	}
 
 	return players, nil
+}
+
+func handleError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return entity.ErrNotFound
+	} else {
+		log.Debugf("player.infrastructure: %s", err)
+		return entity.ErrUnknownInfrastructureError
+	}
 }

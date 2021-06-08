@@ -18,7 +18,8 @@ func (s *Service) GetRecentGames() {
 
 // RequestMatch requests the match information for a share code
 func (s *Service) RequestMatch(sc *share_code.ShareCodeData) {
-	log.Debugf("requesting match details for %v %d", sc.Encoded, sc.MatchID)
+	const msg = "requesting match details for %v %d"
+	log.Debugf(msg, sc.Encoded, sc.MatchID)
 
 	// Request match info
 	s.Write(uint32(csgo.ECsgoGCMsg_k_EMsgGCCStrike15_v2_MatchListRequestFullGameInfo), &csgo.CMsgGCCStrike15V2_MatchListRequestFullGameInfo{

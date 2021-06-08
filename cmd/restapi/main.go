@@ -46,8 +46,7 @@ func main() {
 
 	// By default it serves on :8080 unless a
 	// PORT environment variable was defined.
-	err := router.Run()
-	if err != nil {
+	if err := router.Run(); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -53,12 +53,14 @@ func main() {
 			}
 
 			if _, err = matchService.CreateMatchFromSharecode(sc); err != nil {
-				log.Errorf("unable to create match from sharecode %s", err)
+				const msg = "unable to create match from sharecode %s"
+				log.Errorf(msg, err)
 				continue
 			}
 
 			if err = userService.UpdateLatestShareCode(u, sc); err != nil {
-				log.Errorf("unable to update user latest share code %s", err)
+				const msg = "unable to update user latest share code %s"
+				log.Errorf(msg, err)
 				continue
 			}
 

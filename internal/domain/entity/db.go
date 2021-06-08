@@ -26,17 +26,17 @@ func NewService(c config.UseCase) *Service {
 
 func (s *Service) connect() {
 	dbConfig := s.configurationService.GetConfig().Database
-	dsn := fmt.Sprintf("mongodb://%v:%v@%v:%v/%v",
+	const connString = "mongodb://%v:%v@%v:%v/%v"
+	dsn := fmt.Sprintf(connString,
 		dbConfig.Username, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Database)
 	clientOptions := options.Client().ApplyURI(dsn)
 	mongoClient, err := mongo.Connect(s.ctx, clientOptions)
-	s.client = mongoClient
 	if err != nil {
 		log.Fatal(err)
 	}
+	s.client = mongoClient
 
-	err = s.client.Ping(s.ctx, nil)
-	if err != nil {
+	if err = s.client.Ping(s.ctx, nil); err != nil {
 		log.Fatal(err)
 	}
 }

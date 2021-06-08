@@ -32,6 +32,10 @@ func (s *Service) UpdateDownloadInformationForOutcomeId(id uint64, matchTime tim
 	m.Time = matchTime
 	m.DownloadURL = url
 
+	if err := m.Validate(); err != nil {
+		return err
+	}
+
 	return s.repo.UpdateDownloadInformation(m)
 }
 
@@ -66,11 +70,21 @@ func (s *Service) GetValveMatchesMissingDownloadUrl() ([]*Match, error) {
 func (s *Service) SetDownloaded(m *Match, st Status, f string) error {
 	m.Status = st
 	m.Filename = f
+
+	if err := m.Validate(); err != nil {
+		return err
+	}
+
 	return s.repo.UpdateDownloaded(m)
 }
 
 func (s *Service) UpdateStatus(m *Match, st Status) error {
 	m.Status = st
+
+	if err := m.Validate(); err != nil {
+		return err
+	}
+
 	return s.repo.UpdateStatus(m)
 }
 

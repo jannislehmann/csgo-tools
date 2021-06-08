@@ -15,7 +15,8 @@ func (s *Service) handleMatchStart(e events.MatchStart) {
 	s.SidesSwitched = false
 
 	if s.configurationService.IsDebug() {
-		s.debug(fmt.Sprintf("Game started on map %v", s.Match.Map))
+		const msg = "Game started on map %v"
+		s.debug(fmt.Sprintf(msg, s.Match.Map))
 	}
 
 	gameState := s.parser.GameState()
@@ -59,7 +60,8 @@ func (s *Service) handleRoundStart(e events.RoundStart) {
 	s.Match.Rounds = append(s.Match.Rounds, &Round{})
 
 	if s.configurationService.IsDebug() {
-		s.debug(fmt.Sprintf("Starting round %d", s.CurrentRound))
+		const msg = "Starting round %d"
+		s.debug(fmt.Sprintf(msg, s.CurrentRound))
 	}
 }
 
@@ -70,7 +72,8 @@ func (s *Service) handleMVP(e events.RoundMVPAnnouncement) {
 	}
 
 	if s.configurationService.IsDebug() {
-		s.debug(fmt.Sprintf("MVP for round %d is %v", s.CurrentRound, player.Name))
+		const msg = "MVP for round %d is %v"
+		s.debug(fmt.Sprintf(msg, s.CurrentRound, player.Name))
 	}
 
 	s.Match.Rounds[s.CurrentRound-1].MVP = player
@@ -85,7 +88,8 @@ func (s *Service) handleRoundEnd(e events.RoundEnd) {
 	round := s.Match.Rounds[s.CurrentRound-1]
 
 	if s.configurationService.IsDebug() {
-		s.debug(fmt.Sprintf("Ending round %d with winner %v", s.CurrentRound, e.Message))
+		const msg = "Ending round %d with winner %v"
+		s.debug(fmt.Sprintf(msg, s.CurrentRound, e.Message))
 	}
 
 	round.Winner = s.Match.Teams[GetTeamIndex(e.Winner, s.SidesSwitched)]

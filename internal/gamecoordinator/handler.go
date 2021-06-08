@@ -29,9 +29,11 @@ func (s *Service) HandleMatchList(packet *gamecoordinator.GCPacket) {
 			time := time.Unix(int64(*matchEntry.Matchtime), 0)
 			err := s.matchService.UpdateDownloadInformationForOutcomeId(id, time, round.GetMap())
 			if err != nil {
-				log.Errorf("gamecoordinator: %s", err)
+				const msg = "gamecoordinator: %s"
+				log.Errorf(msg, err)
 			} else {
-				log.Debugf("gamecoordinator: saved match details for %d", id)
+				const msg = "gamecoordinator: saved match details for %d"
+				log.Debugf(msg, id)
 			}
 		}
 	}
@@ -57,10 +59,12 @@ func (s *Service) HandleGCReady(e *GCReadyEvent) {
 			go s.RequestMatch(sc)
 			select {
 			case <-matchResponse:
-				log.Debugf("gamecoordinator: received response for %s", sc.Encoded)
+				const msg = "gamecoordinator: received response for %s"
+				log.Debugf(msg, sc.Encoded)
 				ch <- true
 			case <-time.After(15 * time.Second):
-				log.Debugf("gamecoordinator: failed to receive response for %s", sc.Encoded)
+				const msg = "gamecoordinator: failed to receive response for %s"
+				log.Debugf(msg, sc.Encoded)
 				ch <- false
 			}
 

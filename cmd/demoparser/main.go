@@ -74,17 +74,14 @@ func worker(matches <-chan *match.Match) {
 		parser := demoparser.NewService(configService)
 		demoFile := &demo.Demo{ID: m.ID, MatchTime: m.CreatedAt, Filename: filename}
 
-		err := parser.Parse(configService.GetConfig().DemosDir, demoFile)
-
-		if err != nil {
+		if err := parser.Parse(configService.GetConfig().DemosDir, demoFile); err != nil {
 			log.Error(err)
 			continue
 		}
 
 		result := match.CreateResult(parser.Match)
-		persistMatchErr := matchService.UpdateResult(m, result, ParserVersion)
-		if persistMatchErr != nil {
-			log.Error(persistMatchErr)
+		if err := matchService.UpdateResult(m, result, ParserVersion); err != nil {
+			log.Error(err)
 			continue
 		}
 
@@ -92,17 +89,19 @@ func worker(matches <-chan *match.Match) {
 			for _, playerResult := range t.Players {
 				player, err := playerService.GetPlayer(playerResult.SteamID)
 				if err != nil {
-					log.Errorf("main: unable to query player: %s", err)
+					const msg = "main: unable to query player: %s"
+					log.Errorf(msg, err)
 					continue
 				}
 
 				playerResult.MatchID = m.ID
-				if persistPlayerErr := playerService.AddResult(player, playerResult); persistPlayerErr != nil {
-					log.Error(persistPlayerErr)
+				if err := playerService.AddResult(player, playerResult); err != nil {
+					log.Error(err)
 				}
 			}
 		}
 
-		log.Infof("demoparser: finished parsing %s", filename)
+		const msg = "demoparser: finished parsing %s"
+		log.Infof(msg, filename)
 	}
 }

@@ -26,7 +26,6 @@ func (s *Service) Connect(username, password, twoFactorSecret string) {
 	myLoginInfo.Username = username
 	myLoginInfo.Password = password
 	twoFactorCode, err := totpInstance.GenerateCode()
-
 	if err != nil {
 		log.Error(err)
 	}
@@ -34,8 +33,7 @@ func (s *Service) Connect(username, password, twoFactorSecret string) {
 	myLoginInfo.TwoFactorCode = twoFactorCode
 
 	client := steam.NewClient()
-	_, connectErr := client.Connect()
-	if connectErr != nil {
+	if _, connectErr := client.Connect(); connectErr != nil {
 		log.Panic(connectErr)
 	}
 

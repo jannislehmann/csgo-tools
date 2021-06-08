@@ -22,8 +22,8 @@ func NewService() *Service {
 	}
 	jsonParser := json.NewDecoder(configFile)
 	service.config = &Config{}
-	err = jsonParser.Decode(service.GetConfig())
-	if err != nil {
+
+	if err = jsonParser.Decode(service.GetConfig()); err != nil {
 		log.Fatal(err)
 	}
 	defer configFile.Close()
