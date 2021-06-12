@@ -12,10 +12,10 @@ import (
 )
 
 // HandlerMap is the map of message types to handler functions
-type HandlerMap map[uint32]func(packet *gamecoordinator.GCPacket) error
+type HandlerMap map[uint32]func(packet *gamecoordinator.GCPacket)
 
-// CS holds the steam client and whether the client is connected to the GameCoordinator
-type CS struct {
+// GC holds the steam client and whether the client is connected to the GameCoordinator
+type GC struct {
 	client      *steam.Client
 	isConnected bool
 	handlers    HandlerMap
@@ -28,68 +28,62 @@ type GCReadyEvent struct{}
 const AppID = 730
 
 // NewCSGO creates a CS client from a steam client and registers the packet handler
-func NewCSGO(client *steam.Client) *CS {
-	c := &CS{client: client, isConnected: false}
-
-	client.GC.RegisterPacketHandler(c)
-	c.buildHandlerMap()
-
-	return c
+func (s *Service) Connect(client *steam.Client) {
+	s.gc = &GC{client: client, isConnected: false}
+	s.BuildHandlerMap()
+	s.gc.client.GC.RegisterPacketHandler(s)
+	s.SetPlaying(true)
+	s.ShakeHands()
 }
 
 // SetPlaying sets the steam account to play csgo
-func (c *CS) SetPlaying(playing bool) {
+func (s *Service) SetPlaying(playing bool) {
 	if playing {
-		c.client.GC.SetGamesPlayed(730)
+		s.gc.client.GC.SetGamesPlayed(730)
 	} else {
-		c.client.GC.SetGamesPlayed()
+		s.gc.client.GC.SetGamesPlayed()
 	}
 }
 
 // ShakeHands sends a hello to the GC
-func (c *CS) ShakeHands() {
+func (s *Service) ShakeHands() {
 	// Try to avoid not being ready on instant call of connection
 	time.Sleep(5 * time.Second)
 
-	c.Write(uint32(csgo.EGCBaseClientMsg_k_EMsgGCClientHello), &csgo.CMsgClientHello{
+	s.Write(uint32(csgo.EGCBaseClientMsg_k_EMsgGCClientHello), &csgo.CMsgClientHello{
 		Version: proto.Uint32(1),
 	})
 }
 
 // HandleGCPacket takes incoming packets from the GC and coordinates them to the handler funcs.
-func (c *CS) HandleGCPacket(packet *gamecoordinator.GCPacket) {
+func (s *Service) HandleGCPacket(packet *gamecoordinator.GCPacket) {
 	if packet.AppId != AppID {
 		log.Debug("wrong app id")
 		return
 	}
 
-	handler, ok := c.handlers[packet.MsgType]
-	if ok && handler != nil {
-		if err := handler(packet); err != nil {
-			log.Debugf("Error handling packet %d", packet.MsgType)
-			log.Error(err)
-			ok = false //nolint
-		}
+	if handler, ok := s.gc.handlers[packet.MsgType]; ok {
+		handler(packet)
 	}
 }
 
 // Write sends a message to the game coordinator.
-func (c *CS) Write(messageType uint32, msg proto.Message) {
-	c.client.GC.Write(gamecoordinator.NewGCMsgProtobuf(AppID, messageType, msg))
+func (s *Service) Write(messageType uint32, msg proto.Message) {
+	s.gc.client.GC.Write(gamecoordinator.NewGCMsgProtobuf(AppID, messageType, msg))
 }
 
 // emit emits an event.
-func (c *CS) emit(event interface{}) {
-	c.client.Emit(event)
+func (s *Service) emit(event interface{}) {
+	s.gc.client.Emit(event)
 }
 
 // registers all csgo message handlers
-func (c *CS) buildHandlerMap() {
-	c.handlers = HandlerMap{
+func (s *Service) BuildHandlerMap() {
+	s.gc.handlers = HandlerMap{
 		// Welcome
-		uint32(csgo.EGCBaseClientMsg_k_EMsgGCClientWelcome): c.HandleClientWelcome,
+		uint32(csgo.EGCBaseClientMsg_k_EMsgGCClientWelcome): s.HandleClientWelcome,
 
 		// Match Making
-		uint32(csgo.ECsgoGCMsg_k_EMsgGCCStrike15_v2_MatchList): c.HandleMatchList,
+		uint32(csgo.ECsgoGCMsg_k_EMsgGCCStrike15_v2_MatchList): s.HandleMatchList,
 	}
 }

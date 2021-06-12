@@ -10,22 +10,23 @@ import (
 )
 
 // Inits the players and teams.
-func (p *DemoParser) handleMatchStart(e events.MatchStart) {
-	p.Match.Map = p.Match.Header.MapName
-	p.SidesSwitched = false
+func (s *Service) handleMatchStart(e events.MatchStart) {
+	s.Match.Map = s.Match.Header.MapName
+	s.SidesSwitched = false
 
-	if ConfigData.IsDebug() {
-		p.debug(fmt.Sprintf("Game started on map %v", p.Match.Map))
+	if s.configurationService.IsDebug() {
+		const msg = "Game started on map %v"
+		s.debug(fmt.Sprintf(msg, s.Match.Map))
 	}
 
-	gameState := p.parser.GameState()
+	gameState := s.parser.GameState()
 
 	// Create teams.
 	ct := gameState.TeamCounterTerrorists()
 	t := gameState.TeamTerrorists()
 
-	p.Match.Teams[GetTeamIndex(t.Team(), p.SidesSwitched)] = &Team{State: t, StartedAs: common.TeamTerrorists}
-	p.Match.Teams[GetTeamIndex(ct.Team(), p.SidesSwitched)] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
+	s.Match.Teams[GetTeamIndex(t.Team(), s.SidesSwitched)] = &Team{State: t, StartedAs: common.TeamTerrorists}
+	s.Match.Teams[GetTeamIndex(ct.Team(), s.SidesSwitched)] = &Team{State: ct, StartedAs: common.TeamCounterTerrorists}
 
 	// Create players and map them to the teams.
 	for _, player := range gameState.Participants().Playing() {
@@ -33,84 +34,87 @@ func (p *DemoParser) handleMatchStart(e events.MatchStart) {
 			continue
 		}
 
-		p.AddPlayer(player)
+		s.AddPlayer(player)
 	}
 }
 
-func (p *DemoParser) handleGamePhaseChanged(e events.GamePhaseChanged) {
+func (s *Service) handleGamePhaseChanged(e events.GamePhaseChanged) {
 	switch e.NewGamePhase {
 	case common.GamePhaseInit:
-		p.SidesSwitched = false
+		s.SidesSwitched = false
 	case common.GamePhaseTeamSideSwitch:
-		p.SidesSwitched = !p.SidesSwitched
+		s.SidesSwitched = !s.SidesSwitched
 	case common.GamePhaseGameEnded:
-		p.Match.Duration = p.parser.CurrentTime()
+		s.Match.Duration = s.parser.CurrentTime()
 	}
 }
 
-func (p *DemoParser) handleRoundStart(e events.RoundStart) {
-	if p.RoundOngoing {
+func (s *Service) handleRoundStart(e events.RoundStart) {
+	if s.RoundOngoing {
 		return
 	}
 
-	p.CurrentRound++
-	p.RoundOngoing = true
-	p.RoundStart = p.parser.CurrentTime()
-	p.Match.Rounds = append(p.Match.Rounds, &Round{})
+	s.CurrentRound++
+	s.RoundOngoing = true
+	s.RoundStart = s.parser.CurrentTime()
+	s.Match.Rounds = append(s.Match.Rounds, &Round{})
 
-	if ConfigData.IsDebug() {
-		p.debug(fmt.Sprintf("Starting round %d", p.CurrentRound))
+	if s.configurationService.IsDebug() {
+		const msg = "Starting round %d"
+		s.debug(fmt.Sprintf(msg, s.CurrentRound))
 	}
 }
 
-func (p *DemoParser) handleMVP(e events.RoundMVPAnnouncement) {
-	player, err := p.getPlayer(e.Player)
+func (s *Service) handleMVP(e events.RoundMVPAnnouncement) {
+	player, err := s.getPlayer(e.Player)
 	if err != nil {
-		log.Panic(err)
+		log.Error(err)
 	}
 
-	if ConfigData.IsDebug() {
-		p.debug(fmt.Sprintf("MVP for round %d is %v", p.CurrentRound, player.Name))
+	if s.configurationService.IsDebug() {
+		const msg = "MVP for round %d is %v"
+		s.debug(fmt.Sprintf(msg, s.CurrentRound, player.Name))
 	}
 
-	p.Match.Rounds[p.CurrentRound-1].MVP = player
+	s.Match.Rounds[s.CurrentRound-1].MVP = player
 }
 
-func (p *DemoParser) handleRoundEnd(e events.RoundEnd) {
-	if !p.RoundOngoing {
+func (s *Service) handleRoundEnd(e events.RoundEnd) {
+	if !s.RoundOngoing {
 		return
 	}
 
-	p.RoundOngoing = false
-	round := p.Match.Rounds[p.CurrentRound-1]
+	s.RoundOngoing = false
+	round := s.Match.Rounds[s.CurrentRound-1]
 
-	if ConfigData.IsDebug() {
-		p.debug(fmt.Sprintf("Ending round %d with winner %v", p.CurrentRound, e.Message))
+	if s.configurationService.IsDebug() {
+		const msg = "Ending round %d with winner %v"
+		s.debug(fmt.Sprintf(msg, s.CurrentRound, e.Message))
 	}
 
-	round.Winner = p.Match.Teams[GetTeamIndex(e.Winner, p.SidesSwitched)]
+	round.Winner = s.Match.Teams[GetTeamIndex(e.Winner, s.SidesSwitched)]
 	round.WinReason = e.Reason
-	round.Duration = p.parser.CurrentTime() - p.RoundStart
+	round.Duration = s.parser.CurrentTime() - s.RoundStart
 }
 
-func (p *DemoParser) handleKill(e events.Kill) {
-	if p.parser.GameState().IsWarmupPeriod() || p.CurrentRound == 0 {
+func (s *Service) handleKill(e events.Kill) {
+	if s.parser.GameState().IsWarmupPeriod() || s.CurrentRound == 0 {
 		return
 	}
 
-	round := p.Match.Rounds[p.CurrentRound-1]
-	kill := &Kill{Time: p.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot,
+	round := s.Match.Rounds[s.CurrentRound-1]
+	kill := &Kill{Time: s.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot,
 		AssistedFlash: e.AssistedFlash, AttackerBlind: e.AttackerBlind, NoScope: e.NoScope,
-		ThroughSmoke: e.ThroughSmoke, ThroughWall: e.IsWallBang(), IsDuringRound: p.RoundOngoing}
+		ThroughSmoke: e.ThroughSmoke, ThroughWall: e.IsWallBang(), IsDuringRound: s.RoundOngoing}
 
-	victim, err := p.getPlayer(e.Victim)
+	victim, err := s.getPlayer(e.Victim)
 	if err == nil {
 		kill.Victim = victim
 	}
 
 	// Add optional killer if player died e.g. through fall damage.
 	if e.Killer != nil {
-		killer, err := p.getPlayer(e.Killer)
+		killer, err := s.getPlayer(e.Killer)
 		if err == nil {
 			kill.Killer = killer
 		}
@@ -118,22 +122,11 @@ func (p *DemoParser) handleKill(e events.Kill) {
 
 	// Add optional assister.
 	if e.Assister != nil {
-		assister, err := p.getPlayer(e.Assister)
+		assister, err := s.getPlayer(e.Assister)
 		if err == nil {
 			kill.Assister = assister
 		}
 	}
 
 	round.Kills = append(round.Kills, kill)
-}
-
-func (p *DemoParser) debug(message string) {
-	if ConfigData.IsTrace() {
-		log.WithFields(log.Fields{
-			"Match": p.Match.ID,
-			"Round": p.CurrentRound,
-		}).Trace(message)
-	} else {
-		log.Debug(message)
-	}
 }

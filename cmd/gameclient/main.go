@@ -4,78 +4,40 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/Cludch/csgo-tools/internal/config"
-	"github.com/Cludch/csgo-tools/internal/entity"
+	"github.com/Cludch/csgo-tools/internal/domain/entity"
+	"github.com/Cludch/csgo-tools/internal/domain/match"
 	"github.com/Cludch/csgo-tools/internal/gamecoordinator"
-	"github.com/Cludch/csgo-tools/pkg/demo"
+	"github.com/Cludch/csgo-tools/internal/steam_client"
 	"github.com/Philipp15b/go-steam/v2"
-	"github.com/Philipp15b/go-steam/v2/protocol/steamlang"
-	"github.com/Philipp15b/go-steam/v2/totp"
-	"gorm.io/gorm"
 )
 
-var configData *config.Config
-var db *gorm.DB
-var csgoClient *gamecoordinator.CS
+var configService *config.Service
+var matchService *match.Service
+var steamService *steam_client.Service
+var gamecoordinatorService *gamecoordinator.Service
 
-func init() {
-	configData = config.GetConfiguration()
+func setup() {
 	err := steam.InitializeSteamDirectory()
-
 	if err != nil {
 		log.Error(err)
 	}
 
-	configData.SetLoggingLevel()
+	configService = config.NewService()
+	db := entity.NewService(configService)
+
+	matchService = match.NewService(match.NewRepositoryMongo(db))
+	gamecoordinatorService = gamecoordinator.NewService(matchService)
+	steamService = steam_client.NewService(gamecoordinatorService)
 
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
 		DisableColors: false,
 	})
-
-	db = entity.GetDatabase()
-	gamecoordinator.DB = db
 }
 
 func main() {
-	demos := demo.ScanDemosDir(config.GetConfiguration().DemosDir)
-	for _, match := range demos {
-		entity.CreateDownloadedMatchFromMatchID(match.MatchID, match.Filename, match.MatchTime)
-	}
+	setup()
 
-	totpInstance := totp.NewTotp(configData.Steam.TwoFactorSecret)
-
-	myLoginInfo := new(steam.LogOnDetails)
-	myLoginInfo.Username = configData.Steam.Username
-	myLoginInfo.Password = configData.Steam.Password
-	twoFactorCode, err := totpInstance.GenerateCode()
-
-	if err != nil {
-		log.Error(err)
-	}
-
-	myLoginInfo.TwoFactorCode = twoFactorCode
-
-	client := steam.NewClient()
-	_, connectErr := client.Connect()
-	if connectErr != nil {
-		log.Panic(connectErr)
-	}
-
-	for event := range client.Events() {
-		switch e := event.(type) {
-		case *steam.ConnectedEvent:
-			log.Info("connected to steam. Logging in...")
-			client.Auth.LogOn(myLoginInfo)
-		case *steam.LoggedOnEvent:
-			log.Info("logged on")
-			client.Social.SetPersonaState(steamlang.EPersonaState_Invisible)
-			csgoClient = gamecoordinator.NewCSGO(client)
-			csgoClient.SetPlaying(true)
-			csgoClient.ShakeHands()
-		case *gamecoordinator.GCReadyEvent:
-			csgoClient.HandleGCReady(e)
-		case steam.FatalErrorEvent:
-			log.Panic(e)
-		}
-	}
+	configData := configService.GetConfig()
+	steamService.Connect(configData.Steam.Username, configData.Steam.Password, configData.Steam.TwoFactorSecret)
 }

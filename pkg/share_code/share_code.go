@@ -1,24 +1,31 @@
-package entity
+package share_code
 
 import (
 	"math/big"
 	"regexp"
-	"strings"
-	"time"
 
-	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
+	"github.com/Cludch/csgo-tools/pkg/util"
+
+	"strings"
 )
 
-// ShareCode holds the match and share code.
-type ShareCode struct {
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Encoded   string         `gorm:"primaryKey"`
-	OutcomeID uint64
-	MatchID   uint64
-	Token     uint32
+type errInvalidShareCode struct{}
+
+func (e errInvalidShareCode) Error() string {
+	return "share_code: invalid share code"
+}
+
+func IsInvalidShareCodeError(err error) bool {
+	_, ok := err.(errInvalidShareCode)
+	return ok
+}
+
+// ShareCodeData holds the decoded match data and encoded share code.
+type ShareCodeData struct {
+	Encoded   string `json:"encoded" bson:"encoded"`
+	OutcomeID uint64 `json:"outcomeId" bson:"outcomeId"`
+	MatchID   uint64 `json:"matchId" bson:"matchId"`
+	Token     uint32 `json:"token" bson:"token"`
 }
 
 // dictionary is used for the share code decoding.
@@ -27,31 +34,21 @@ const dictionary = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefhijkmnopqrstuvwxyz23456789"
 // Used for share code decoding.
 var bitmask64 uint64 = 18446744073709551615
 
-// CreateShareCodeFromEncoded creates a database entity from the encoded share code.
-// The encoded share code will be decoded first.
-func CreateShareCodeFromEncoded(shareCode string) *ShareCode {
-	sc := DecodeShareCode(shareCode)
-	if sc == nil {
-		log.Warnf("unable to decode share code %v", shareCode)
-		return nil
-	}
-	db.FirstOrCreate(&sc)
-	return sc
+// Validate validates an string whether the format matches a valid share code.
+func Validate(code string) bool {
+	var validateRe = regexp.MustCompile(`^CSGO(-?[\w]{5}){5}$`)
+	return validateRe.MatchString(code)
 }
 
 // DecodeShareCode decodes the share code. Taken from ValvePython/csgo.
-func DecodeShareCode(code string) *ShareCode {
-	var validateRe = regexp.MustCompile(`^CSGO(-?[\w]{5}){5}$`)
-	found := validateRe.MatchString(code)
-
-	if !found {
-		log.Warnf("invalid share code %v", code)
-		return nil
+func Decode(code string) (*ShareCodeData, error) {
+	if !Validate(code) {
+		return nil, &errInvalidShareCode{}
 	}
 
 	var re = regexp.MustCompile(`^CSGO|\-`)
 	s := re.ReplaceAllString(code, "")
-	s = reverse(s)
+	s = util.Reverse(s)
 
 	bigNumber := big.NewInt(0)
 
@@ -60,7 +57,7 @@ func DecodeShareCode(code string) *ShareCode {
 		bigNumber = bigNumber.Add(bigNumber, big.NewInt(int64(strings.Index(dictionary, string(c)))))
 	}
 
-	a := swapEndianness(bigNumber)
+	a := SwapEndianness(bigNumber)
 
 	matchid := big.NewInt(0)
 	outcomeid := big.NewInt(0)
@@ -72,20 +69,12 @@ func DecodeShareCode(code string) *ShareCode {
 	token = token.Rsh(a, 128)
 	token = token.And(token, big.NewInt(0xFFFF))
 
-	shareCode := &ShareCode{MatchID: matchid.Uint64(), OutcomeID: outcomeid.Uint64(), Token: uint32(token.Uint64()), Encoded: code}
-	return shareCode
-}
-
-// reverse a string.
-func reverse(s string) (result string) {
-	for _, v := range s {
-		result = string(v) + result
-	}
-	return
+	shareCode := &ShareCodeData{MatchID: matchid.Uint64(), OutcomeID: outcomeid.Uint64(), Token: uint32(token.Uint64()), Encoded: code}
+	return shareCode, nil
 }
 
 // swapEndianness changes the byte order.
-func swapEndianness(number *big.Int) *big.Int {
+func SwapEndianness(number *big.Int) *big.Int {
 	result := big.NewInt(0)
 
 	left := big.NewInt(0)

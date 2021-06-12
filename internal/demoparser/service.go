@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Cludch/csgo-tools/internal/config"
+	"github.com/Cludch/csgo-tools/internal/domain/entity"
 	"github.com/Cludch/csgo-tools/pkg/demo"
 	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs"
 	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/common"
@@ -19,18 +20,25 @@ import (
 var ConfigData *config.Config
 
 // DemoParser holds the instance of one demo consisting of the file handle and the parsed data.
-type DemoParser struct {
-	parser        demoinfocs.Parser
-	Match         *MatchData
-	CurrentRound  byte
-	RoundStart    time.Duration
-	RoundOngoing  bool
-	SidesSwitched bool
+type Service struct {
+	configurationService config.UseCase
+	parser               demoinfocs.Parser
+	Match                *MatchData
+	CurrentRound         byte
+	RoundStart           time.Duration
+	RoundOngoing         bool
+	SidesSwitched        bool
+}
+
+func NewService(c config.UseCase) *Service {
+	return &Service{
+		configurationService: c,
+	}
 }
 
 // MatchData holds information about the match itself.
 type MatchData struct {
-	ID       uint64
+	ID       entity.ID
 	Map      string
 	Header   *common.DemoHeader
 	Players  []*Player
@@ -80,8 +88,8 @@ type Kill struct {
 }
 
 // Parse takes a demo file and starts parsing by registering all required event handlers.
-func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
-	p.Match = &MatchData{ID: demoFile.MatchID, Time: demoFile.MatchTime}
+func (s *Service) Parse(dir string, demoFile *demo.Demo) error {
+	s.Match = &MatchData{ID: demoFile.ID, Time: demoFile.MatchTime}
 
 	f, err := os.Open(path.Join(dir, demoFile.Filename))
 
@@ -89,75 +97,69 @@ func (p *DemoParser) Parse(dir string, demoFile *demo.File) error {
 		return err
 	}
 
-	log.Infof("Starting demo parsing of match %d", p.Match.ID)
+	const msg = "Starting demo parsing of match %s"
+	log.Infof(msg, s.Match.ID)
 
-	p.parser = demoinfocs.NewParser(f)
-	defer p.parser.Close()
+	s.parser = demoinfocs.NewParser(f)
+	defer s.parser.Close()
 	defer f.Close()
 
 	// Parsing the header within an event handler crashes.
-	header, _ := p.parser.ParseHeader()
-	p.Match.Header = &header
+	header, _ := s.parser.ParseHeader()
+	s.Match.Header = &header
 
 	// Register all handler
-	p.parser.RegisterEventHandler(p.handleMatchStart)
-	p.parser.RegisterEventHandler(p.handleGamePhaseChanged)
-	p.parser.RegisterEventHandler(p.handleKill)
-	p.parser.RegisterEventHandler(p.handleMVP)
-	p.parser.RegisterEventHandler(p.handleRoundStart)
-	p.parser.RegisterEventHandler(p.handleRoundEnd)
+	s.parser.RegisterEventHandler(s.handleMatchStart)
+	s.parser.RegisterEventHandler(s.handleGamePhaseChanged)
+	s.parser.RegisterEventHandler(s.handleKill)
+	s.parser.RegisterEventHandler(s.handleMVP)
+	s.parser.RegisterEventHandler(s.handleRoundStart)
+	s.parser.RegisterEventHandler(s.handleRoundEnd)
 
-	return p.parser.ParseToEnd()
+	return s.parser.ParseToEnd()
 }
 
-func (p *DemoParser) getPlayer(player *common.Player) (*Player, error) {
+// AddPlayer adds a player to the game and returns the pointer.
+func (s *Service) AddPlayer(player *common.Player) *Player {
+	teamID := GetTeamIndex(player.Team, s.SidesSwitched)
+	teams := s.Match.Teams
+	teamPlayers := teams[teamID].Players
+
+	customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
+
+	teams[teamID].Players = append(teamPlayers, customPlayer)
+	s.Match.Players = append(s.Match.Players, customPlayer)
+
+	return customPlayer
+}
+
+func (s *Service) getPlayer(player *common.Player) (*Player, error) {
 	if player.IsBot {
 		return nil, errors.New("Player is a bot")
 	}
 
-	for _, localPlayer := range p.Match.Players {
+	for _, localPlayer := range s.Match.Players {
 		if player.SteamID64 == localPlayer.SteamID {
 			return localPlayer, nil
 		}
 	}
 
-	for _, gamePlayer := range p.parser.GameState().Participants().Playing() {
+	for _, gamePlayer := range s.parser.GameState().Participants().Playing() {
 		if player.SteamID64 == gamePlayer.SteamID64 {
-			return p.AddPlayer(player), nil
+			return s.AddPlayer(player), nil
 		}
 	}
 
 	return nil, errors.New("Player not found in local match struct " + strconv.FormatUint(player.SteamID64, 10))
 }
 
-// GetTeamIndex returns 0 for T, 1 for CT and 2 for everything else.
-func GetTeamIndex(team common.Team, sidesSwitched bool) byte {
-	if team == common.TeamTerrorists {
-		if !sidesSwitched {
-			return 0
-		}
-		return 1
-	} else if team == common.TeamCounterTerrorists {
-		if !sidesSwitched {
-			return 1
-		}
-		return 0
+func (s *Service) debug(message string) {
+	if s.configurationService.IsTrace() {
+		log.WithFields(log.Fields{
+			"Match": s.Match.ID,
+			"Round": s.CurrentRound,
+		}).Trace(message)
+	} else {
+		log.Debug(message)
 	}
-
-	// Could also return an error here but we do not expect this to happen.
-	return 2
-}
-
-// AddPlayer adds a player to the game and returns the pointer.
-func (p *DemoParser) AddPlayer(player *common.Player) *Player {
-	teamID := GetTeamIndex(player.Team, p.SidesSwitched)
-	teams := p.Match.Teams
-	teamPlayers := teams[teamID].Players
-
-	customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
-
-	teams[teamID].Players = append(teamPlayers, customPlayer)
-	p.Match.Players = append(p.Match.Players, customPlayer)
-
-	return customPlayer
 }
