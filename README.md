@@ -57,6 +57,8 @@ Copy the `config.json.example` in the `configs` dir and rename it to `config.jso
 The `demosDir` setting is the directory, in which the demos should be stored (e.g. `demos/`).
 The `debug` parameter can be enabled to receive a few more debug output.
 
+You can also use ENV vars to override single or set all configuration variables. The formatting for the configuration is as with the JSON configuration. The ENV base is `CSGO`. The Steam two factor secret turns into `STEAM_TWOFACTORSECRET`.
+
 ### Steam
 
 | Key   |      Value      |  Explanation |

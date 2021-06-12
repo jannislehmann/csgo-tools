@@ -1,10 +1,10 @@
 package config
 
 import (
-	"encoding/json"
-	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 type Service struct {
@@ -14,19 +14,24 @@ type Service struct {
 func NewService() *Service {
 	service := Service{}
 
-	file := "./configs/config.json"
-	configFile, err := os.Open(file)
-	if err != nil {
-		configFile.Close()
-		log.Fatal(err)
-	}
-	jsonParser := json.NewDecoder(configFile)
-	service.config = &Config{}
+	replacer := strings.NewReplacer(".", "_")
+	viper.SetEnvKeyReplacer(replacer)
 
-	if err = jsonParser.Decode(service.GetConfig()); err != nil {
-		log.Fatal(err)
+	viper.AddConfigPath("./configs")
+	viper.SetConfigType("json")
+	viper.SetConfigName("config")
+	viper.SetEnvPrefix("csgo")
+
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Panic(err)
 	}
-	defer configFile.Close()
+
+	service.config = &Config{}
+	if err := viper.Unmarshal(&service.config); err != nil {
+		log.Panic(err)
+	}
 
 	service.setLoggingLevel()
 
@@ -35,27 +40,27 @@ func NewService() *Service {
 
 // Config holds the application configuration.
 type Config struct {
-	DemosDir string          `json:"demosDir"`
-	Steam    *SteamConfig    `json:"steam"`
-	Database *DatabaseConfig `json:"database"`
-	Debug    string          `json:"debug"`
+	DemosDir string          `mapstructure:"demosDir"`
+	Steam    *SteamConfig    `mapstructure:"steam"`
+	Database *DatabaseConfig `mapstructure:"database"`
+	Debug    string          `mapstructure:"debug"`
 }
 
 // SteamConfig holds the configuration about the steam account to use for communicating with the GameCoordinator.
 type SteamConfig struct {
-	SteamAPIKey     string `json:"apiKey"`
-	Username        string `json:"username"`
-	Password        string `json:"password"`
-	TwoFactorSecret string `json:"twoFactorSecret"`
+	SteamAPIKey     string `mapstructure:"apiKey"`
+	Username        string `mapstructure:"username"`
+	Password        string `mapstructure:"password"`
+	TwoFactorSecret string `mapstructure:"twoFactorSecret"`
 }
 
 // DatabaseConfig holds database connection information.
 type DatabaseConfig struct {
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Database string `json:"database"`
+	Host     string `mapstructure:"host"`
+	Port     string `mapstructure:"port"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+	Database string `mapstructure:"database"`
 }
 
 // GetConfig returns the application configuration.
