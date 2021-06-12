@@ -2,24 +2,23 @@
 
 The CSGO tool suit can automatically detect and download new CSGO official matchmaking demos using the GameCoordinator.
 In order to do this, a few API credentials and a **separate** Steam account is needed. The application creates a CSGO game sessions using the separate account
-and uses the Steam web API to check whether a new demo can be fetched. If that is the case, the application sends a full match info request to the game's GameCoordinator.
+and uses the Steam Web API to check whether a new demo can be fetched. If that's the case, the application sends a full match info request to the game's GameCoordinator.
 The GC then returns information about the match which also contain a download link.
-
-The tool saves all the match ids from the demos in the `demos` directory. This is used to prevent downloading a demo every few minutes.
 
 ## Tools
 
-The toolset currently features the following tools.
+The toolset currently features the following tools. All tools share one MongoDB database instance.
 
-### valveapiclient
+### ValveAPI client
 
 The API client consumes Valve's game history API and saves the game share codes in the database.
+In order to add a new steam / csgo user, whose demos should be monitored, a user must be manually created in the database.
 
-### Gameclient
+### Game client
 
 The game client uses the CSGO gamecoordinator to talk to the ingame "API". By doing so, the tool can request match information, history and most importantly the download links for each demo.
 
-### Demodownloader
+### Demo Downloader
 
 The demo downloader takes the demo urls from the database and downloads them if they are missing.
 
@@ -35,6 +34,17 @@ The demo parser parses the previously downloaded demo files and calculates the f
 
 When a new demoparser version gets released, the tool will automatically reparse demos, which were parsed with
 an older version. Therefore, new statistiscs will also be added for older demos. This, however, requires the demos to be permanently persisted.
+
+## REST API
+
+The REST api serves basic match and player stats via the following routes.
+
+| Route | Description |
+|---------------------|-------------:|
+| `/match`            | Lists all available matches. |
+| `/match/:id`        | Serves information and outcome about one specific match. |
+| `/player/:id`       | Lists information about one player. |
+| `/player/:id/stats` | Calculates and serves average stats for one player. |
 
 ## Usage
 
@@ -56,22 +66,12 @@ The `debug` parameter can be enabled to receive a few more debug output.
 | `password` |   `totally_secret`   |  Steam password |
 | `twoFactorSecret` |   `aGV5IQ==`   | Base64 encoded two factor secret. Can be generated using e.g. the [Steam Desktop Authenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator) |
 
-### CSGO
-
-The csgo array contains mulitple account information about accounts to watch.
-
-| Key   |      Value      |  Explanation |
-|----------|-------------:|------:|
-| `matchHistoryAuthenticationCode` |  `1234-ABCDE-5678`  | The match history authentication code can be generated [here](https://help.steampowered.com/en/wizard/HelpWithGameIssue/?appid=730&issueid=128) |
-| `knownMatchCode` | `CSGO-abcde-efghi-jklmn-opqrs-tuvwx` |  A share code from one of your latest matches. Can be received via the Game -> Matches |
-| `steamId` |   `76561198185324675`   |  The SteamID64 of the account to watch |
-
 ### Database
 
 | Key   |      Value      |  Explanation |
 |----------|-------------:|------:|
 | `host` |   `localhost`   |  The database host |
-| `port` | `5432` | The database port |
+| `port` | `27017` | The database port |
 | `username` |   `csgo`   |  Username of the database user |
 | `password` |   `b`   |  Secret password of the database user |
 | `database` |   `csgo`   | The database name to store the data in |
@@ -89,3 +89,4 @@ This tool is not affiliated with Valve Software or Steam.
 * [cs-go](https://github.com/Gacnt/cs-go)
 * [go-dota2](https://github.com/paralin/go-dota2)
 * [csgo](https://github.com/ValvePython/csgo)
+* [Uber style guide](https://github.com/uber-go/guide/blob/master/style.md)
