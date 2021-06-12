@@ -79,8 +79,9 @@ func (u *User) AddSteamMatchHistoryAuthenticationCode(authenticationCode string,
 }
 
 func (u *User) Validate() error {
-	if err := validate.Struct(u).(validator.ValidationErrors); err != nil {
-		return err
+	err := validate.Struct(u)
+	if err != nil {
+		return err.(validator.ValidationErrors)
 	}
 
 	return nil

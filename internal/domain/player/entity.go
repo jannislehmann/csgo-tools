@@ -49,8 +49,9 @@ func NewPlayer(id uint64) (*Player, error) {
 }
 
 func (p *Player) Validate() error {
-	if err := validate.Struct(p).(validator.ValidationErrors); err != nil {
-		return err
+	err := validate.Struct(p)
+	if err != nil {
+		return err.(validator.ValidationErrors)
 	}
 
 	return nil

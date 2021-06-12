@@ -201,8 +201,9 @@ func (m *MatchResult) getPlayer(player *demoparser.Player) *player.PlayerResult 
 }
 
 func (m *Match) Validate() error {
-	if err := validate.Struct(m).(validator.ValidationErrors); err != nil {
-		return err
+	err := validate.Struct(m)
+	if err != nil {
+		return err.(validator.ValidationErrors)
 	}
 
 	return nil
