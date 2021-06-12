@@ -49,7 +49,7 @@ func main() {
 			url := m.DownloadURL
 			if err := util.DownloadDemo(url, configService.GetConfig().DemosDir, m.Time); err != nil {
 				if os.IsTimeout(err) {
-					log.Error("Lost connection", err)
+					log.Error("lost connection", err)
 					continue
 				} else if util.IsDemoNotFoundError(err) {
 					status = match.Unavailable
@@ -60,7 +60,7 @@ func main() {
 				filename = strings.Split(path.Base(url), ".")[0] + ".dem"
 				status = match.Downloaded
 
-				const msg = "downloaded demo %v"
+				const msg = "downloaded demo %s"
 				log.Infof(msg, m.Filename)
 			}
 
