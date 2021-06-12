@@ -237,7 +237,7 @@ func handleError(err error) error {
 		return nil
 	}
 
-	if errors.Is(err, mongo.ErrNoDocuments) {
+	if errors.Is(err, mongo.ErrNoDocuments) || errors.Is(err, entity.ErrNotFound) {
 		return entity.ErrNotFound
 	} else {
 		const msg = "match.infrastructure: %s"

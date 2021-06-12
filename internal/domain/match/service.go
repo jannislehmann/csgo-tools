@@ -90,7 +90,7 @@ func (s *Service) UpdateStatus(m *Match, st Status) error {
 
 func (s *Service) CreateMatchFromSharecode(sc *share_code.ShareCodeData) (*Match, error) {
 	dbMatch, err := s.GetMatchByValveId(sc.MatchID)
-	if err != nil || dbMatch != nil {
+	if err != nil && !errors.Is(err, entity.ErrNotFound) || dbMatch != nil {
 		return dbMatch, err
 	}
 
