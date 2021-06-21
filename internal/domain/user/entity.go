@@ -23,7 +23,7 @@ type SteamUser struct {
 	Nickname      string `json:"nickname" bson:"nickname" validate:"required"`
 	AuthCode      string `json:"authCode" bson:"authCode"`
 	LastShareCode string `json:"lastShareCode" bson:"lastShareCode"`
-	APIEnabled    bool   `json:"apiEnabled" bson:"apiEnabled" validate:"required"`
+	APIEnabled    bool   `json:"apiEnabled" bson:"apiEnabled"`
 }
 
 // FaceitUser contains the information about the linked faceit account.
