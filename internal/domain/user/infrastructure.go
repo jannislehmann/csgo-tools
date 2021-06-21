@@ -37,11 +37,11 @@ func (r *RepositoryMongo) createIndex() {
 	models := []mongo.IndexModel{
 		{
 			Keys:    bson.D{{Key: "steam.id", Value: 1}},
-			Options: options.Index().SetUnique(true).SetName("steam_id"),
+			Options: options.Index().SetUnique(true).SetSparse(true).SetName("steam_id"),
 		},
 		{
 			Keys:    bson.D{{Key: "faceit.id", Value: 1}},
-			Options: options.Index().SetUnique(true).SetName("faceit_id"),
+			Options: options.Index().SetUnique(true).SetSparse(true).SetName("faceit_id"),
 		},
 	}
 
