@@ -33,6 +33,7 @@ type UseCase interface {
 	CreateMatchFromSharecode(*share_code.ShareCodeData) (*Match, error)
 
 	GetAll() ([]*Match, error)
+	GetAllParsed() ([]*Match, error)
 	GetMatch(entity.ID) (*Match, error)
 	GetMatchByValveId(uint64) (*Match, error)
 	GetMatchByValveOutcomeId(uint64) (*Match, error)

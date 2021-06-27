@@ -47,6 +47,10 @@ func (s *Service) GetAll() ([]*Match, error) {
 	return s.repo.List()
 }
 
+func (s *Service) GetAllParsed() ([]*Match, error) {
+	return s.repo.ListParsedMatches()
+}
+
 func (s *Service) GetMatchByValveId(id uint64) (*Match, error) {
 	return s.repo.FindByValveId(id)
 }

@@ -19,7 +19,7 @@ func NewController(s UseCase) *Controller {
 
 // GetMatches returns all matches from the database.
 func (c *Controller) GetMatches(g *gin.Context) {
-	matches, _ := c.service.GetAll()
+	matches, _ := c.service.GetAllParsed()
 	g.JSON(http.StatusOK, matches)
 }
 
