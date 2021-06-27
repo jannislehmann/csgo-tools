@@ -171,11 +171,14 @@ func (s *Service) QueryLatestShareCode(u *User) (*share_code.ShareCodeData, erro
 			log.Errorf(msg, err)
 		}
 
-		updateErr := s.UpdateSteamAPIUsage(u, false)
-		if updateErr != nil {
-			const msg = "disabled csgo user %d due to an error (%t) in fetching the share code"
-			log.Warnf(msg, steamID, err)
-		}
+		/*
+			// TODO Issue #64
+			updateErr := s.UpdateSteamAPIUsage(u, false)
+			if updateErr != nil {
+				const msg = "disabled csgo user %d due to an error (%t) in fetching the share code"
+				log.Warnf(msg, steamID, err)
+			}
+		*/
 		return nil, err
 	}
 
