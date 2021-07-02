@@ -11,11 +11,10 @@ type MatchList struct {
 }
 
 type MatchListEntry struct {
-	ID        entity.ID `json:"id"`
-	Time      time.Time `json:"time"`
-	CreatedAt time.Time `json:"createdAt"`
-	Map       string    `json:"map"`
-	Result    string    `json:"result"`
+	ID     entity.ID `json:"id"`
+	Time   time.Time `json:"time"`
+	Map    string    `json:"map"`
+	Result string    `json:"result"`
 }
 
 // PlayerGameStats describes average stats across all matches.

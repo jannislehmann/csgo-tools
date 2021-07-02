@@ -27,7 +27,7 @@ func (c *Controller) GetMatches(g *gin.Context) {
 
 	for i, match := range matches {
 		matchList.Matches[i] = &restapi.MatchListEntry{
-			ID: match.ID, Time: match.Time, CreatedAt: match.CreatedAt, Map: match.Result.Map,
+			ID: match.ID, Time: match.Time, Map: match.Result.Map,
 			Result: fmt.Sprintf(resultTemplate, match.Result.Teams[0].Wins, match.Result.Teams[1].Wins)}
 	}
 
