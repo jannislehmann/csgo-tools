@@ -13,7 +13,7 @@ type PlayerGameStats struct {
 	Won1v3            int    `json:"won1v3"`
 	Won1v4            int    `json:"won1v4"`
 	Won1v5            int    `json:"won1v5"`
-	RoundsWith3K      int    `json:"3k"`
-	RoundsWith4K      int    `json:"4k"`
-	RoundsWith5K      int    `json:"5k"`
+	RoundsWith3K      int    `json:"roundsWith3k"`
+	RoundsWith4K      int    `json:"roundsWith4k"`
+	RoundsWith5K      int    `json:"roundsWith5k"`
 }
