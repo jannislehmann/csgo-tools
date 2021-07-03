@@ -148,7 +148,9 @@ func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 		playerKills := make(map[*player.PlayerResult]byte)
 
 		// Process in round function in order to calculate all round information like amount of kills / round.
-		for _, kill := range round.Kills {
+		for index, kill := range round.Kills {
+			roundResult.Kills[index] = kill
+
 			// Victim may be null, if it was a bot.
 			if kill.Victim != nil {
 				m.getPlayer(kill.Victim).Deaths++
