@@ -33,7 +33,7 @@ func (s *Service) HandleMatchList(packet *gamecoordinator.GCPacket) {
 				log.Errorf(msg, err)
 			} else {
 				const msg = "gamecoordinator: saved match details for %d"
-				log.Debugf(msg, id)
+				log.Infof(msg, id)
 			}
 		}
 	}
