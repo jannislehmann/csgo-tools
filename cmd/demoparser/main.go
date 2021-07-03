@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const ParserVersion = 1
+const ParserVersion = 2
 
 var configService *config.Service
 var matchService *match.Service
