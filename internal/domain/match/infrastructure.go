@@ -66,8 +66,14 @@ func (r *RepositoryMongo) Find(id entity.ID) (*Match, error) {
 	return m, handleError(err)
 }
 
+func (r *RepositoryMongo) FindByFilename(filename string) (*Match, error) {
+	filterConfig := bson.M{"faceitMatchId": filename}
+	m, err := r.filterOne(filterConfig)
+	return m, handleError(err)
+}
+
 func (r *RepositoryMongo) FindByFaceitId(id entity.ID) (*Match, error) {
-	filterConfig := bson.M{"faceitMatchId": id}
+	filterConfig := bson.M{"filename": id}
 	m, err := r.filterOne(filterConfig)
 	return m, handleError(err)
 }

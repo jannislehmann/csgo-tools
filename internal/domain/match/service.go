@@ -43,6 +43,10 @@ func (s *Service) GetMatch(id entity.ID) (*Match, error) {
 	return s.repo.Find(id)
 }
 
+func (s *Service) GetMatchByFilename(filename string) (*Match, error) {
+	return s.repo.FindByFilename(filename)
+}
+
 func (s *Service) GetAll() ([]*Match, error) {
 	return s.repo.List()
 }
@@ -100,6 +104,18 @@ func (s *Service) CreateMatchFromSharecode(sc *share_code.ShareCodeData) (*Match
 
 	m, _ := NewMatch(MatchMaking)
 	m.ShareCode = sc
+	return m, s.repo.Create(m)
+}
+
+func (s *Service) CreateMatchFromManualUpload(filename string, matchTime time.Time) (*Match, error) {
+	dbMatch, err := s.GetMatchByFilename(filename)
+	if err != nil && !errors.Is(err, entity.ErrNotFound) || dbMatch != nil {
+		return nil, nil
+	}
+
+	m, _ := NewMatch(Manual)
+	m.Filename = filename
+	m.Time = matchTime
 	return m, s.repo.Create(m)
 }
 

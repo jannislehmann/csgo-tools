@@ -34,6 +34,19 @@ func setup() {
 func main() {
 	setup()
 
+	// Scan for new local files
+	demos, _ := demo.ScanDemosDir(configService.GetConfig().DemosDir)
+	for _, demo := range demos {
+		m, err := matchService.CreateMatchFromManualUpload(demo.Filename, demo.MatchTime)
+		if err != nil {
+			msg := "unable to create manual uploaded demo for file %s"
+			log.Warn(msg, demo.Filename)
+		} else if m != nil {
+			msg := "found demo file %s and created manual upload entity"
+			log.Infof(msg, m.Filename)
+		}
+	}
+
 	log.Info("starting demoparser")
 
 	const numJobs = 5

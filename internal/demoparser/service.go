@@ -108,7 +108,7 @@ func (s *Service) Parse(dir string, demoFile *demo.Demo) error {
 	header, _ := s.parser.ParseHeader()
 	s.Match.Header = &header
 
-	// Register all handler
+	// Register all handler.
 	s.parser.RegisterEventHandler(s.handleMatchStart)
 	s.parser.RegisterEventHandler(s.handleGamePhaseChanged)
 	s.parser.RegisterEventHandler(s.handleKill)

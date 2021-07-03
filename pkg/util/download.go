@@ -47,8 +47,8 @@ func DownloadDemo(url string, demoDir string, lastModified time.Time) error {
 	}
 
 	// Get file name.
-	fileName := strings.Split(path.Base(url), ".")[0] + ".dem"
-	filePath := path.Join(demoDir, fileName)
+	filename := strings.Split(path.Base(url), ".")[0] + ".dem"
+	filePath := path.Join(demoDir, filename)
 
 	// Get the data.
 	resp, err := http.Get(url) //nolint // We have to take dynamic replay urls in order to download them. URL is validated before.
@@ -92,7 +92,7 @@ func DownloadDemo(url string, demoDir string, lastModified time.Time) error {
 	// Update file modified information.
 	if err = os.Chtimes(filePath, lastModified, lastModified); err != nil {
 		const msg = "unable to set correct last modified date for demo %v"
-		log.Warnf(msg, fileName)
+		log.Warnf(msg, filename)
 		log.Error(err)
 	}
 

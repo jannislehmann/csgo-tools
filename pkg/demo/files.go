@@ -29,12 +29,12 @@ func ScanDemosDir(path string) ([]*Demo, error) {
 				return nil
 			}
 
-			// Ignore non .dem-files
+			// Ignore non .dem-files.
 			if filepath.Ext(path) != ".dem" {
 				return nil
 			}
 
-			fileName := info.Name()
+			filename := info.Name()
 
 			// Get file creation date.
 			modTime := time.Now()
@@ -44,8 +44,8 @@ func ScanDemosDir(path string) ([]*Demo, error) {
 				modTime = stats.ModTime()
 			}
 
-			// Add demo
-			demos = append(demos, &Demo{ID: entity.NewID(), MatchTime: modTime, Filename: fileName})
+			// Add demo.
+			demos = append(demos, &Demo{ID: entity.NewID(), MatchTime: modTime, Filename: filename})
 
 			return nil
 		})
