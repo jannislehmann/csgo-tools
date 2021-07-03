@@ -97,8 +97,8 @@ func (s *Service) Parse(dir string, demoFile *demo.Demo) error {
 		return err
 	}
 
-	const msg = "Starting demo parsing of match %s"
-	log.Infof(msg, s.Match.ID)
+	const msg = "Starting demo parsing of match %s (file %s)"
+	log.Infof(msg, s.Match.ID, demoFile.Filename)
 
 	s.parser = demoinfocs.NewParser(f)
 	defer s.parser.Close()
