@@ -67,13 +67,13 @@ func (r *RepositoryMongo) Find(id entity.ID) (*Match, error) {
 }
 
 func (r *RepositoryMongo) FindByFilename(filename string) (*Match, error) {
-	filterConfig := bson.M{"faceitMatchId": filename}
+	filterConfig := bson.M{"filename": filename}
 	m, err := r.filterOne(filterConfig)
 	return m, handleError(err)
 }
 
 func (r *RepositoryMongo) FindByFaceitId(id entity.ID) (*Match, error) {
-	filterConfig := bson.M{"filename": id}
+	filterConfig := bson.M{"faceitMatchId": id}
 	m, err := r.filterOne(filterConfig)
 	return m, handleError(err)
 }
