@@ -61,7 +61,7 @@ func main() {
 				status = match.Downloaded
 
 				const msg = "downloaded demo %s"
-				log.Infof(msg, m.Filename)
+				log.Infof(msg, filename)
 			}
 
 			// Mark as downloaded and save file name.
