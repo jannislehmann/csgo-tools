@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
-	"github.com/Cludch/csgo-tools/internal/restapi"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,11 +21,11 @@ func NewController(s UseCase) *Controller {
 // GetMatches returns all matches from the database.
 func (c *Controller) GetMatches(g *gin.Context) {
 	matches, _ := c.service.GetAllParsed()
-	matchList := &restapi.MatchList{Matches: make([]*restapi.MatchListEntry, len(matches))}
+	matchList := &MatchList{Matches: make([]*MatchListEntry, len(matches))}
 	resultTemplate := "%d - %d"
 
 	for i, match := range matches {
-		matchList.Matches[i] = &restapi.MatchListEntry{
+		matchList.Matches[i] = &MatchListEntry{
 			ID: match.ID, Time: match.Time, Map: match.Result.Map,
 			Result: fmt.Sprintf(resultTemplate, match.Result.Teams[0].Wins, match.Result.Teams[1].Wins)}
 	}

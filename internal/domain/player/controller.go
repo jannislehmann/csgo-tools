@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Cludch/csgo-tools/internal/restapi"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,7 +27,7 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 	id, _ := strconv.ParseUint(g.Param("id"), 10, 64)
 	player, _ := c.service.GetPlayer(id)
 
-	playerStats := &restapi.PlayerGameStats{}
+	playerStats := &PlayerGameStats{}
 
 	assists, kills, entryKills, headshots, deaths, mvps := 0, 0, 0, 0, 0, 0
 

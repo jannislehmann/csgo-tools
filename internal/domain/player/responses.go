@@ -1,21 +1,4 @@
-package restapi
-
-import (
-	"time"
-
-	"github.com/Cludch/csgo-tools/internal/domain/entity"
-)
-
-type MatchList struct {
-	Matches []*MatchListEntry `json:"matches"`
-}
-
-type MatchListEntry struct {
-	ID     entity.ID `json:"id"`
-	Time   time.Time `json:"time"`
-	Map    string    `json:"map"`
-	Result string    `json:"result"`
-}
+package player
 
 // PlayerGameStats describes average stats across all matches.
 type PlayerGameStats struct {
