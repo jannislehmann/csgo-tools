@@ -57,16 +57,26 @@ type MatchResult struct {
 	Time          time.Time     `json:"time" bson:"time" validate:"required"`
 	Duration      time.Duration `json:"duration" bson:"duration" validate:"required"`
 	// 0 = T / 1 = CT
-	Teams []*TeamResult `json:"teams" validate:"required,dive"`
+	Teams  []*TeamResult  `json:"teams" validate:"required,dive"`
+	Rounds []*RoundResult `json:"rounds" validate:"required,dive"`
 }
 
 // TeamResult describes the players and wins for one team.
 type TeamResult struct {
 	// TeamID describes the side the team started as.
-	TeamID          common.Team            `json:"id" bson:"id" validate:"required,gt=0"`
+	TeamID          common.Team            `json:"id" bson:"id" validate:"required,gte=2,lte=3"`
 	Players         []*player.PlayerResult `json:"players" bson:"players" validate:"required,dive"`
 	Wins            byte                   `json:"wins" bson:"wins" validate:"required"`
-	PistolRoundWins byte                   `json:"pistolRoundWins" bson:"pistolRoundWins" validate:"required"`
+	PistolRoundWins byte                   `json:"pistolRoundWins" bson:"pistolRoundWins"`
+}
+
+// RoundResult contains information about a single round
+type RoundResult struct {
+	RoundNumber  byte                 `json:"roundNumber" validate:"required"`
+	Duration     time.Duration        `json:"duration" validate:"required"`
+	Kills        []*demoparser.Kill   `json:"kills" validate:"required,dive"`
+	MVP          *player.PlayerResult `json:"mvp" validate:"required"`
+	WinnerTeamID common.Team          `json:"winnerTeamId" validate:"required,gte=2,lte=3"`
 }
 
 func NewMatch(source Source) (*Match, error) {
@@ -86,7 +96,7 @@ func NewMatch(source Source) (*Match, error) {
 // Process processes the match data and creates more performance-based results per player in order to persist these in the database.
 func CreateResult(m *demoparser.MatchData) *MatchResult {
 	// Create result.
-	result := &MatchResult{Map: m.Map, Duration: m.Duration, Time: m.Time, Teams: make([]*TeamResult, 2)}
+	result := &MatchResult{Map: m.Map, Duration: m.Duration, Time: m.Time, Teams: make([]*TeamResult, 2), Rounds: make([]*RoundResult, len(m.Rounds))}
 
 	// Create teams.
 	for _, team := range m.Teams {
@@ -113,14 +123,21 @@ func CreateResult(m *demoparser.MatchData) *MatchResult {
 
 func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 	for index, round := range rounds {
+		// Create round result and log
+		roundResult := &RoundResult{RoundNumber: byte(index + 1), Duration: round.Duration, Kills: make([]*demoparser.Kill, len(round.Kills))}
+		m.Rounds[index] = roundResult
+
 		// MVP can be nil when the round ended because one team surrendered.
 		mvp := m.getPlayer(round.MVP)
 		if mvp != nil {
 			mvp.MVPs++
+			roundResult.MVP = mvp
 		}
 
+		// Get winner
 		winner := m.getTeam(round.Winner.StartedAs)
 		winner.Wins++
+		roundResult.WinnerTeamID = winner.TeamID
 
 		// Pistol round wins.
 		roundNumber := index + 1
