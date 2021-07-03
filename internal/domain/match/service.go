@@ -116,6 +116,7 @@ func (s *Service) CreateMatchFromManualUpload(filename string, matchTime time.Ti
 	m, _ := NewMatch(Manual)
 	m.Filename = filename
 	m.Time = matchTime
+	m.Status = Downloaded
 	return m, s.repo.Create(m)
 }
 
