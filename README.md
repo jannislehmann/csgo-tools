@@ -78,6 +78,12 @@ You can also use ENV vars to override single or set all configuration variables.
 | `password` |   `b`   |  Secret password of the database user |
 | `database` |   `csgo`   | The database name to store the data in |
 
+### Parser
+
+| Key   |      Value      |  Explanation |
+|----------|-------------:|------:|
+| `workerCount` |   `5`   |  The amount of workers to parellely parse demos |
+
 ## Disclaimer
 
 This is my first ever Golang project, thus you might find some bad practice and a few performance issues in the long run.

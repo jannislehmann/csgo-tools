@@ -12,6 +12,9 @@
         "password": "secret",
         "database": "csgo"
     },
+    "parser": {
+        "workerCount": 5
+    },
     "demosDir": "/home/csgo/demos/",
     "debug": "false"
 }

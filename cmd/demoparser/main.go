@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/Cludch/csgo-tools/internal/config"
@@ -49,11 +50,14 @@ func main() {
 
 	log.Info("starting demoparser")
 
-	const numJobs = 5
+	numJobs, _ := strconv.ParseInt(configService.GetConfig().Parser.WorkerCount, 10, 32)
 	matchQueue := make(chan *match.Match, numJobs)
 
+	msg := "using %d workers"
+	log.Infof(msg, numJobs)
+
 	// Start numJobs-times parallel workers.
-	for w := 1; w <= numJobs; w++ {
+	for w := int64(1); w <= numJobs; w++ {
 		go worker(matchQueue)
 	}
 

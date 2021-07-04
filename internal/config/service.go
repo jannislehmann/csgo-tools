@@ -44,6 +44,7 @@ type Config struct {
 	Steam    *SteamConfig    `mapstructure:"steam"`
 	Database *DatabaseConfig `mapstructure:"database"`
 	Debug    string          `mapstructure:"debug"`
+	Parser   *ParserConfig   `mapstructure:"parser"`
 }
 
 // SteamConfig holds the configuration about the steam account to use for communicating with the GameCoordinator.
@@ -61,6 +62,10 @@ type DatabaseConfig struct {
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
 	Database string `mapstructure:"database"`
+}
+
+type ParserConfig struct {
+	WorkerCount string `mapstructure:"workerCount"`
 }
 
 // GetConfig returns the application configuration.
