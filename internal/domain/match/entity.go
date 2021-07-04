@@ -75,7 +75,7 @@ type RoundResult struct {
 	RoundNumber  byte          `json:"roundNumber" bson:"roundNumber" validate:"required"`
 	Duration     time.Duration `json:"duration" bson:"duration" validate:"required"`
 	Kills        []*KillResult `json:"kills" bson:"kills"  validate:"required,dive"`
-	MVPPlayerID  uint64        `json:"mvp" bson:"mvpPlayerId" validate:"required"`
+	MVPPlayerID  uint64        `json:"mvp" bson:"mvpPlayerId"`
 	WinnerTeamID common.Team   `json:"winnerTeamId" bson:"winnerTeamId" validate:"required,gte=2,lte=3"`
 }
 
