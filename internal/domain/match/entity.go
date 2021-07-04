@@ -70,13 +70,29 @@ type TeamResult struct {
 	PistolRoundWins byte                   `json:"pistolRoundWins" bson:"pistolRoundWins"`
 }
 
-// RoundResult contains information about a single round
+// RoundResult contains information about a single round.
 type RoundResult struct {
-	RoundNumber  byte                 `json:"roundNumber" validate:"required"`
-	Duration     time.Duration        `json:"duration" validate:"required"`
-	Kills        []*demoparser.Kill   `json:"kills" validate:"required,dive"`
-	MVP          *player.PlayerResult `json:"mvp" validate:"required"`
-	WinnerTeamID common.Team          `json:"winnerTeamId" validate:"required,gte=2,lte=3"`
+	RoundNumber  byte          `json:"roundNumber" bson:"roundNumber" validate:"required"`
+	Duration     time.Duration `json:"duration" bson:"duration" validate:"required"`
+	Kills        []*KillResult `json:"kills" bson:"kills"  validate:"required,dive"`
+	MVPPlayerID  uint64        `json:"mvp" bson:"mvpPlayerId" validate:"required"`
+	WinnerTeamID common.Team   `json:"winnerTeamId" bson:"winnerTeamId" validate:"required,gte=2,lte=3"`
+}
+
+// KillResult contains information about a kill.
+type KillResult struct {
+	Tick            time.Duration        `json:"tick" bson:"tick" validate:"required"`
+	VictimID        uint64               `json:"victimId" bson:"victimId"`
+	KillerID        uint64               `json:"killerId" bson:"killerId"`
+	AssisterID      uint64               `json:"assisterId" bson:"assisterId"`
+	Weapon          common.EquipmentType `json:"weapon" bson:"" validate:"required"`
+	IsDuringRound   bool                 `json:"isDuringRound" bson:"isDuringRound"`
+	IsHeadshot      bool                 `json:"isHeadshot" bson:"isHeadshot"`
+	IsFlashAssist   bool                 `json:"isFlashAssist" bson:"isFlashAssist"`
+	IsAttackerBlind bool                 `json:"isAttackerBlind" bson:"isAttackerBlind"`
+	IsNoScope       bool                 `json:"isNoScope" bson:"isNoScope"`
+	IsThroughSmoke  bool                 `json:"isThroughSmoke" bson:"isThroughSmoke"`
+	IsThroughWall   bool                 `json:"isThroughWall" bson:"isThroughWall"`
 }
 
 func NewMatch(source Source) (*Match, error) {
@@ -121,17 +137,47 @@ func CreateResult(m *demoparser.MatchData) *MatchResult {
 	return result
 }
 
+// CreateRoundResult takes a parsed round and returns a persistable RoundResult.
+func CreateRoundResult(r *demoparser.Round) *RoundResult {
+	return &RoundResult{Duration: r.Duration, Kills: make([]*KillResult, len(r.Kills))}
+}
+
+// CreateKillResult takes a parsed kill and returns a persistable KillResult.
+func CreateKillResult(k *demoparser.Kill) *KillResult {
+	killResult := &KillResult{Tick: k.Tick,
+		Weapon: k.Weapon, IsDuringRound: k.IsDuringRound, IsHeadshot: k.IsHeadshot, IsFlashAssist: k.IsFlashAssist, IsAttackerBlind: k.IsAttackerBlind,
+		IsNoScope: k.IsNoScope, IsThroughSmoke: k.IsThroughSmoke, IsThroughWall: k.IsThroughWall,
+	}
+
+	// --- Check whether the victim, killer and assister are set before trying to access its property.
+
+	if k.Victim != nil {
+		killResult.VictimID = k.Victim.SteamID
+	}
+
+	if k.Killer != nil {
+		killResult.KillerID = k.Killer.SteamID
+	}
+
+	if k.Assister != nil {
+		killResult.AssisterID = k.Assister.SteamID
+	}
+
+	return killResult
+}
+
 func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 	for index, round := range rounds {
 		// Create round result and log
-		roundResult := &RoundResult{RoundNumber: byte(index + 1), Duration: round.Duration, Kills: make([]*demoparser.Kill, len(round.Kills))}
+		roundResult := CreateRoundResult(round)
+		roundResult.RoundNumber = byte(index + 1)
 		m.Rounds[index] = roundResult
 
 		// MVP can be nil when the round ended because one team surrendered.
 		mvp := m.getPlayer(round.MVP)
 		if mvp != nil {
 			mvp.MVPs++
-			roundResult.MVP = mvp
+			roundResult.MVPPlayerID = mvp.SteamID
 		}
 
 		// Get winner
@@ -149,7 +195,9 @@ func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 
 		// Process in round function in order to calculate all round information like amount of kills / round.
 		for index, kill := range round.Kills {
-			roundResult.Kills[index] = kill
+			// Create and add killresult
+			killResult := CreateKillResult(kill)
+			roundResult.Kills[index] = killResult
 
 			// Victim may be null, if it was a bot.
 			if kill.Victim != nil {
