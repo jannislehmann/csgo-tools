@@ -73,18 +73,18 @@ type Round struct {
 
 // Kill holds information about a kill that happenend during the match.
 type Kill struct {
-	Time          time.Duration
-	Victim        *Player
-	Killer        *Player
-	Assister      *Player
-	Weapon        common.EquipmentType
-	IsDuringRound bool
-	IsHeadshot    bool
-	AssistedFlash bool
-	AttackerBlind bool
-	NoScope       bool
-	ThroughSmoke  bool
-	ThroughWall   bool
+	Tick            time.Duration
+	Victim          *Player
+	Killer          *Player
+	Assister        *Player
+	Weapon          common.EquipmentType
+	IsDuringRound   bool
+	IsHeadshot      bool
+	IsFlashAssist   bool
+	IsAttackerBlind bool
+	IsNoScope       bool
+	IsThroughSmoke  bool
+	IsThroughWall   bool
 }
 
 // Parse takes a demo file and starts parsing by registering all required event handlers.

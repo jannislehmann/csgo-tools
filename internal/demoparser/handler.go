@@ -103,9 +103,9 @@ func (s *Service) handleKill(e events.Kill) {
 	}
 
 	round := s.Match.Rounds[s.CurrentRound-1]
-	kill := &Kill{Time: s.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot,
-		AssistedFlash: e.AssistedFlash, AttackerBlind: e.AttackerBlind, NoScope: e.NoScope,
-		ThroughSmoke: e.ThroughSmoke, ThroughWall: e.IsWallBang(), IsDuringRound: s.RoundOngoing}
+	kill := &Kill{Tick: s.parser.CurrentTime(), Weapon: e.Weapon.Type, IsHeadshot: e.IsHeadshot,
+		IsFlashAssist: e.AssistedFlash, IsAttackerBlind: e.AttackerBlind, IsNoScope: e.NoScope,
+		IsThroughSmoke: e.ThroughSmoke, IsThroughWall: e.IsWallBang(), IsDuringRound: s.RoundOngoing}
 
 	victim, err := s.getPlayer(e.Victim)
 	if err == nil {
