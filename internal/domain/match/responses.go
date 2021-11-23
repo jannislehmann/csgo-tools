@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
+	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/common"
 )
 
 type MatchList struct {
@@ -11,8 +12,10 @@ type MatchList struct {
 }
 
 type MatchListEntry struct {
-	ID     entity.ID `json:"id"`
-	Time   time.Time `json:"time"`
-	Map    string    `json:"map"`
-	Result string    `json:"result"`
+	ID           entity.ID   `json:"id"`
+	Time         time.Time   `json:"time"`
+	Map          string      `json:"map"`
+	TeamOneScore byte        `json:"teamOneScore"`
+	TeamTwoScore byte        `json:"teamTwoScore"`
+	ClanTeam     common.Team `json:"clanTeam"`
 }
