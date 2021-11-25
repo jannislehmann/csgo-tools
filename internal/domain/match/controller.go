@@ -5,7 +5,6 @@ import (
 
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
 	"github.com/gin-gonic/gin"
-	"github.com/markus-wa/demoinfocs-golang/v2/pkg/demoinfocs/common"
 )
 
 type Controller struct {
@@ -26,14 +25,20 @@ func (c *Controller) GetMatches(g *gin.Context) {
 	clanPlayerIds := getClanPlayersIds()
 
 	for i, match := range matches {
-		clanTeam := common.TeamUnassigned
+		clanWon := false
 
-		// Search for the team with a member of the clan
-		for _, team := range match.Result.Teams {
-			for _, teamPlayer := range team.Players {
-				if _, ok := clanPlayerIds[teamPlayer.SteamID]; ok {
-					clanTeam = team.TeamID
-				}
+		teamOne := match.Result.Teams[0]
+		teamTwo := match.Result.Teams[1]
+
+		teamWithHigherScore := teamOne
+		if teamOne.Wins < teamTwo.Wins {
+			teamWithHigherScore = teamTwo
+		}
+
+		// Check if a clan player is in the winning team.
+		for _, teamPlayer := range teamWithHigherScore.Players {
+			if _, ok := clanPlayerIds[teamPlayer.SteamID]; ok {
+				clanWon = true
 			}
 		}
 
@@ -41,7 +46,7 @@ func (c *Controller) GetMatches(g *gin.Context) {
 			ID: match.ID, Time: match.Time, Map: match.Result.Map,
 			TeamOneScore: match.Result.Teams[0].Wins,
 			TeamTwoScore: match.Result.Teams[1].Wins,
-			ClanTeam:     clanTeam,
+			ClanWon:      clanWon,
 		}
 	}
 
