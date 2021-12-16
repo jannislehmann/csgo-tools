@@ -17,7 +17,26 @@ func NewController(s UseCase) *Controller {
 	}
 }
 
-func (c *Controller) GetPlayer(g *gin.Context) {
+func (c *Controller) GetPlayers(g *gin.Context) {
+	players, _ := c.service.GetAll()
+	playerList := &PlayerList{Players: make([]*PlayerListEntry, len(players))}
+
+	for i, player := range players {
+		results := player.Results
+		lenResults := len(results)
+
+		lastPlayerName := results[lenResults-1]
+
+		playerList.Players[i] = &PlayerListEntry{
+			ID: player.ID, Games: lenResults, Name: lastPlayerName.Name,
+		}
+
+	}
+
+	g.JSON(http.StatusOK, playerList)
+}
+
+func (c *Controller) GetPlayerDetails(g *gin.Context) {
 	id, _ := strconv.ParseUint(g.Param("id"), 10, 64)
 	player, _ := c.service.GetPlayer(id)
 	g.JSON(http.StatusOK, player)
@@ -34,6 +53,7 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 	for _, playerResult := range player.Results {
 		playerStats.Games++
 		playerStats.SteamID = playerResult.SteamID
+		playerStats.Name = playerResult.Name
 
 		assists += int(playerResult.Assists)
 		kills += int(playerResult.Kills)

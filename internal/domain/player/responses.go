@@ -1,9 +1,20 @@
 package player
 
+type PlayerList struct {
+	Players []*PlayerListEntry `json:"players"`
+}
+
+type PlayerListEntry struct {
+	ID    uint64 `json:"id"`
+	Name  string `json:"name"`
+	Games int    `json:"games"`
+}
+
 // PlayerGameStats describes average stats across all matches.
 type PlayerGameStats struct {
 	Games             int    `json:"games"`
-	SteamID           uint64 `json:"steamId"`
+	SteamID           uint64 `json:"id"`
+	Name              string `json:"name"`
 	KillsPerGame      int    `json:"killsPerGame"`
 	EntryKillsPerGame int    `json:"entryKillsPerGame"`
 	HeadshotsPerGame  int    `json:"headshotsPerGame"`

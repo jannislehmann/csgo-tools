@@ -41,7 +41,8 @@ func main() {
 
 	router.GET("/match", matchController.GetMatches)
 	router.GET("/match/:id", matchController.GetMatchDetails)
-	router.GET("/player/:id", playerController.GetPlayer)
+	router.GET("/player/", playerController.GetPlayers)
+	router.GET("/player/:id", playerController.GetPlayerDetails)
 	router.GET("/player/:id/stats", playerController.GetPlayerAverageStats)
 
 	// By default it serves on :8080 unless a
