@@ -30,9 +30,9 @@ type PlayerResult struct {
 	Won1v3       byte      `json:"won1v3" bson:"won1v3"`
 	Won1v4       byte      `json:"won1v4" bson:"won1v4"`
 	Won1v5       byte      `json:"won1v5" bson:"won1v5"`
-	RoundsWith3K byte      `json:"roundsWith3K" bson:"3k"`
-	RoundsWith4K byte      `json:"roundsWith4K" bson:"4k"`
-	RoundsWith5K byte      `json:"roundsWith5K" bson:"5k"`
+	RoundsWith3K byte      `json:"roundsWith3k" bson:"3k"`
+	RoundsWith4K byte      `json:"roundsWith4k" bson:"4k"`
+	RoundsWith5K byte      `json:"roundsWith5k" bson:"5k"`
 }
 
 func NewPlayer(id uint64) (*Player, error) {
