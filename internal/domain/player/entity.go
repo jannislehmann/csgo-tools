@@ -10,7 +10,7 @@ import (
 var validate = validator.New()
 
 type Player struct {
-	ID        uint64          `json:"steamId" bson:"_id" validate:"required"`
+	ID        uint64          `json:"id" bson:"_id" validate:"required"`
 	CreatedAt time.Time       `json:"-" bson:"createdAt"`
 	FaceitID  entity.ID       `json:"faceitId" bson:"faceitId,omitempty"`
 	Results   []*PlayerResult `json:"results" bson:"results" validation:"dive"`
