@@ -1,6 +1,16 @@
 version: '3'
 
 services:
+  auth:
+    image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
+    command: "./auth"
+    container_name: auth
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes: 
+      - ./configs:/app/configs
+
   valveapiclient:
     image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
     command: "./valveapiclient"

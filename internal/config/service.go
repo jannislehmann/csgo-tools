@@ -41,10 +41,17 @@ func NewService() *Service {
 // Config holds the application configuration.
 type Config struct {
 	DemosDir string          `mapstructure:"demosDir"`
+	Auth     *AuthConfig     `mapstructure:"auth"`
 	Steam    *SteamConfig    `mapstructure:"steam"`
 	Database *DatabaseConfig `mapstructure:"database"`
 	Debug    string          `mapstructure:"debug"`
 	Parser   *ParserConfig   `mapstructure:"parser"`
+}
+
+// AuthConfig contains the host url for the authentication callback.
+type AuthConfig struct {
+	Host   string `mapstructure:"host"`
+	Secret string `mapstructure:"secret"`
 }
 
 // SteamConfig holds the configuration about the steam account to use for communicating with the GameCoordinator.

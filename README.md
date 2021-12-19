@@ -9,6 +9,10 @@ The GC then returns information about the match which also contain a download li
 
 The toolset currently features the following tools. All tools share one MongoDB database instance.
 
+### Auth
+
+The auth service enables a user to sign in using his / her own Steam account. The generated token can be used with other services at a later point.
+
 ### ValveAPI client
 
 The API client consumes Valve's game history API and saves the game share codes in the database.
@@ -58,6 +62,13 @@ The `demosDir` setting is the directory, in which the demos should be stored (e.
 The `debug` parameter can be enabled to receive a few more debug output.
 
 You can also use ENV vars to override single or set all configuration variables. The formatting for the configuration is as with the JSON configuration. The ENV base is `CSGO`. The Steam two factor secret turns into `STEAM_TWOFACTORSECRET`.
+
+### Auth
+
+| Key   |      Value      |  Explanation |
+|----------|-------------:|------:|
+| `host` |   `http://localhost:8080`   |  The host url for the authentication callback. |
+| `secret` |   `http://localhost:8080`   |  The authentication token secret. E.g. `openssl rand -base64 32` |
 
 ### Steam
 
