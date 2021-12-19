@@ -37,14 +37,14 @@ func (c *Controller) Callback(g *gin.Context) {
 	g.Request.URL.RawQuery = q.Encode()
 	user, err := gothic.CompleteUserAuth(g.Writer, g.Request)
 	if err != nil {
-		g.AbortWithError(http.StatusInternalServerError, err)
+		_ = g.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	token, err := c.service.HandleAuth(user)
 
 	if err != nil {
-		g.AbortWithError(http.StatusInternalServerError, err)
+		_ = g.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
