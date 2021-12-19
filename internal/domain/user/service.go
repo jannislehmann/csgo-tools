@@ -197,7 +197,7 @@ func (s *Service) QueryLatestShareCode(u *User) (*share_code.ShareCodeData, erro
 	// No new match.
 	if shareCode == "" {
 		const msg = "no new match found for %d"
-		log.Debugf(msg, steamID)
+		log.Tracef(msg, steamID)
 		return nil, nil
 	}
 
