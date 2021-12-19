@@ -137,21 +137,33 @@ func (s *Service) UpdateLatestShareCode(u *User, sc *share_code.ShareCodeData) e
 }
 
 func (s *Service) SigninUsingSteam(id uint64, nickname string) (*User, error) {
-	_, err := s.repo.FindBySteamId(id)
-	if err != nil && errors.Is(err, entity.ErrNotFound) {
+	log.Debugf("Attempting sign in using steam for user %d (%s)", id, nickname)
+	user, err := s.repo.FindBySteamId(id)
+	if err != nil {
+		if errors.Is(err, entity.ErrNotFound) {
+			log.Debugf("no user with id %d found. creating a new one..", id)
+			return s.CreateUserUsingSteam(id, nickname)
+		}
+
 		return nil, err
 	}
 
-	return s.CreateUserUsingSteam(id, nickname)
+	return user, nil
 }
 
 func (s *Service) SigninUsingFaceit(id entity.ID, nickname string) (*User, error) {
-	_, err := s.repo.FindByFaceitId(id)
-	if err != nil && errors.Is(err, entity.ErrNotFound) {
+	log.Debugf("Attempting sign in using faceit for user %v (%s)", id, nickname)
+	user, err := s.repo.FindByFaceitId(id)
+	if err != nil {
+		if errors.Is(err, entity.ErrNotFound) {
+			log.Debugf("no user with id %v found. creating a new one..", id)
+			return s.CreateUserUsingFaceit(id, nickname)
+		}
+
 		return nil, err
 	}
 
-	return s.CreateUserUsingFaceit(id, nickname)
+	return user, nil
 }
 
 func (s *Service) QueryLatestShareCode(u *User) (*share_code.ShareCodeData, error) {
