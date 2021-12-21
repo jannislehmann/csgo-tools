@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/Philipp15b/go-steam/v2 v2.0.2
+	github.com/boj/redistore v0.0.0-20180917114910-cd5dcc76aeff
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gin-gonic/gin v1.7.6
 	github.com/go-playground/validator v9.31.0+incompatible

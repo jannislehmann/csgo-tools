@@ -7,6 +7,7 @@ import (
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
 	"github.com/Cludch/csgo-tools/internal/domain/user"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/sessions"
 	"github.com/markbates/goth/gothic"
 
 	log "github.com/sirupsen/logrus"
@@ -15,12 +16,14 @@ import (
 type Controller struct {
 	service     UseCase
 	userService user.UseCase
+	store       sessions.Store
 }
 
-func NewController(s UseCase, u user.UseCase) *Controller {
+func NewController(s UseCase, u user.UseCase, store sessions.Store) *Controller {
 	return &Controller{
 		service:     s,
 		userService: u,
+		store:       store,
 	}
 }
 
@@ -41,36 +44,11 @@ func (c *Controller) Callback(g *gin.Context) {
 		return
 	}
 
-	token, err := c.service.HandleAuth(user)
-
-	if err != nil {
-		_ = g.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
+	// TODO: Use service to create user and add to session
 
 	const msg = "auth: user with id %s signed in"
 	log.Debugf(msg, user.UserID)
-
-	json := gin.H{
-		"type":  "Bearer",
-		"token": token,
-	}
-	g.JSON(http.StatusOK, json)
-}
-
-func (c *Controller) AuthorizeRequest(g *gin.Context) {
-	const BEARER_SCHEMA = "Bearer "
-	authHeader := g.GetHeader("Authorization")
-	tokenString := authHeader[len(BEARER_SCHEMA):]
-	claims, err := c.service.ValidateToken(tokenString)
-
-	if err == nil {
-		g.Set("userId", claims.Id)
-		g.Next()
-	} else {
-		log.Error(err)
-		g.AbortWithStatus(http.StatusUnauthorized)
-	}
+	g.JSON(http.StatusOK, gin.H{})
 }
 
 func (c *Controller) GetUserDetails(g *gin.Context) {

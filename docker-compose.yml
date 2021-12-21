@@ -8,8 +8,21 @@ services:
     restart: unless-stopped
     depends_on:
       - db
+      - auth_redis
     volumes: 
       - ./configs:/app/configs
+
+  auth_redis:
+    image: redis:latest
+    container_name: csgo_auth_session
+    command: redis-server --requirepass csgo_auth_session
+    restart: always
+    ports:
+      - 127.0.0.1:6379:6379
+    expose:
+      - 6379
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   valveapiclient:
     image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
