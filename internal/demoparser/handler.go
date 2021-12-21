@@ -21,6 +21,12 @@ func (s *Service) handleMatchStart(e events.MatchStart) {
 
 	gameState := s.parser.GameState()
 
+	// Clear players array.
+	// This is required for custom demos, which are restarted multiple times
+	// before the actual game start.
+	// This happens in Faceit matches after the knife round.
+	s.Match.Players = make([]*Player, 0)
+
 	// Create teams.
 	ct := gameState.TeamCounterTerrorists()
 	t := gameState.TeamTerrorists()
