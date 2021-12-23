@@ -47,7 +47,7 @@ func (s *Service) GetResult(p *Player, matchId entity.ID) (*PlayerResult, error)
 func (s *Service) AddResult(p *Player, r *PlayerResult) error {
 	matchId := r.MatchID
 
-	// Delete old result
+	// Delete old result.
 	dbResult, err := s.GetResult(p, matchId)
 	if err != nil && !errors.Is(err, entity.ErrNotFound) {
 		return err

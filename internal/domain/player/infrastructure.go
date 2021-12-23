@@ -64,7 +64,7 @@ func (r *RepositoryMongo) DeleteResult(p *Player, matchId entity.ID) error {
 	filter := bson.M{"_id": p.ID}
 
 	pull := bson.D{primitive.E{Key: "$pull", Value: bson.D{
-		primitive.E{Key: "results", Value: bson.D{{Key: "MatchID", Value: matchId}}},
+		primitive.E{Key: "results", Value: bson.D{{Key: "matchId", Value: matchId}}},
 	}}}
 
 	t := &Player{}
