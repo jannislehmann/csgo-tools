@@ -66,7 +66,7 @@ type TeamResult struct {
 	// TeamID describes the side the team started as.
 	TeamID          common.Team            `json:"id" bson:"id" validate:"required,gte=2,lte=3"`
 	Players         []*player.PlayerResult `json:"players" bson:"players" validate:"required,dive"`
-	Wins            byte                   `json:"wins" bson:"wins" validate:"required"`
+	Wins            byte                   `json:"wins" bson:"wins"`
 	PistolRoundWins byte                   `json:"pistolRoundWins" bson:"pistolRoundWins"`
 }
 
