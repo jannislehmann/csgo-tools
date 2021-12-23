@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const ParserVersion = 3
+const ParserVersion = 4
 
 var configService *config.Service
 var matchService *match.Service
@@ -93,6 +93,11 @@ func worker(matches <-chan *match.Match) {
 
 		if err := parser.Parse(configService.GetConfig().DemosDir, demoFile); err != nil {
 			log.Error(err)
+			continue
+		}
+
+		if !parser.GameOver {
+			log.Errorf("Game %v did not finish before parsing ended. The file might be incomplete.", demoFile.Filename)
 			continue
 		}
 

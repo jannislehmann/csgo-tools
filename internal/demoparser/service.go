@@ -28,6 +28,7 @@ type Service struct {
 	RoundStart           time.Duration
 	RoundOngoing         bool
 	SidesSwitched        bool
+	GameOver             bool
 }
 
 func NewService(c config.UseCase) *Service {

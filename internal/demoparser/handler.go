@@ -13,6 +13,7 @@ import (
 func (s *Service) handleMatchStart(e events.MatchStart) {
 	s.Match.Map = s.Match.Header.MapName
 	s.SidesSwitched = false
+	s.GameOver = false
 
 	if s.configurationService.IsDebug() {
 		const msg = "Game started on map %v"
@@ -52,6 +53,7 @@ func (s *Service) handleGamePhaseChanged(e events.GamePhaseChanged) {
 		s.SidesSwitched = !s.SidesSwitched
 	case common.GamePhaseGameEnded:
 		s.Match.Duration = s.parser.CurrentTime()
+		s.GameOver = true
 	}
 }
 
