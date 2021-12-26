@@ -120,6 +120,7 @@ func (s *Service) Parse(dir string, demoFile *demo.Demo) error {
 	s.parser.RegisterEventHandler(s.handleRoundStart)
 	s.parser.RegisterEventHandler(s.handleRoundEnd)
 	s.parser.RegisterEventHandler(s.handleRankUpdate)
+	s.parser.RegisterEventHandler(s.handleParserWarn)
 
 	return s.parser.ParseToEnd()
 }

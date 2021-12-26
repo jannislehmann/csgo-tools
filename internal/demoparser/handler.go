@@ -149,3 +149,7 @@ func (s *Service) handleRankUpdate(e events.RankUpdate) {
 	player.RankNew = e.RankNew
 	player.WinCount = e.WinCount
 }
+
+func (s *Service) handleParserWarn(e events.ParserWarn) {
+	log.Warn(e.Type, e.Message)
+}
