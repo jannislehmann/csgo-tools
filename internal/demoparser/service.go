@@ -58,9 +58,12 @@ type Team struct {
 
 // Player represents one player either as T or CT.
 type Player struct {
-	SteamID uint64
-	Name    string
-	Team    *Team
+	SteamID  uint64
+	Name     string
+	Team     *Team
+	WinCount int
+	RankOld  int
+	RankNew  int
 }
 
 // Round contains information about one round.
@@ -116,6 +119,7 @@ func (s *Service) Parse(dir string, demoFile *demo.Demo) error {
 	s.parser.RegisterEventHandler(s.handleMVP)
 	s.parser.RegisterEventHandler(s.handleRoundStart)
 	s.parser.RegisterEventHandler(s.handleRoundEnd)
+	s.parser.RegisterEventHandler(s.handleRankUpdate)
 
 	return s.parser.ParseToEnd()
 }
@@ -126,7 +130,7 @@ func (s *Service) AddPlayer(player *common.Player) *Player {
 	teams := s.Match.Teams
 	teamPlayers := teams[teamID].Players
 
-	customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID]}
+	customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID], RankOld: -1, RankNew: -1, WinCount: -1}
 
 	teams[teamID].Players = append(teamPlayers, customPlayer)
 	s.Match.Players = append(s.Match.Players, customPlayer)

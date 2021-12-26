@@ -138,3 +138,14 @@ func (s *Service) handleKill(e events.Kill) {
 
 	round.Kills = append(round.Kills, kill)
 }
+
+func (s *Service) handleRankUpdate(e events.RankUpdate) {
+	player, err := s.getPlayer(e.Player)
+	if err != nil {
+		log.Error(err)
+	}
+
+	player.RankOld = e.RankOld
+	player.RankNew = e.RankNew
+	player.WinCount = e.WinCount
+}
