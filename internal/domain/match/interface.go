@@ -25,7 +25,7 @@ type Repository interface {
 	UpdateResult(*Match) error
 	UpdateDownloadInformation(*Match) error
 	UpdateStatus(*Match) error
-	UpdateDownloaded(*Match) error
+	UpdateStatusAndFilename(*Match) error
 
 	Delete(entity.ID) error
 }
@@ -48,5 +48,5 @@ type UseCase interface {
 	UpdateStatus(*Match, Status) error
 	UpdateResult(m *Match, r *MatchResult, parserVersion byte) error
 	UpdateDownloadInformationForOutcomeId(matchId uint64, matchTime time.Time, url string) error
-	SetDownloaded(m *Match, status Status, filename string) error
+	SetStatusAndFilename(m *Match, status Status, filename string) error
 }

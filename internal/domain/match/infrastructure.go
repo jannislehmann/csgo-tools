@@ -162,7 +162,7 @@ func (r *RepositoryMongo) UpdateStatus(m *Match) error {
 	return handleError(r.getCollection().FindOneAndUpdate(ctx, filter, update).Decode(t))
 }
 
-func (r *RepositoryMongo) UpdateDownloaded(m *Match) error {
+func (r *RepositoryMongo) UpdateStatusAndFilename(m *Match) error {
 	filter := bson.M{"_id": m.ID}
 	var update primitive.D
 

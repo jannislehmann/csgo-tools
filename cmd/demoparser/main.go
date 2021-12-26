@@ -1,6 +1,9 @@
 package main
 
 import (
+	"errors"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -13,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const ParserVersion = 4
+const ParserVersion = 5
 
 var configService *config.Service
 var matchService *match.Service
@@ -90,6 +93,14 @@ func worker(matches <-chan *match.Match) {
 
 		parser := demoparser.NewService(configService)
 		demoFile := &demo.Demo{ID: m.ID, MatchTime: m.CreatedAt, Filename: filename}
+
+		// Check if file exists. File may have gotten deleted after being parsed the first time.
+		if _, err := os.Stat(filepath.Join(configService.GetConfig().DemosDir, demoFile.Filename)); errors.Is(err, os.ErrNotExist) {
+			// Set demo as unavailable.
+			if err := matchService.SetStatusAndFilename(m, match.Unavailable, demoFile.Filename); err != nil {
+				log.Warnf("Demo file %v for match with id %v is no longer available.", demoFile.Filename, demoFile.ID)
+			}
+		}
 
 		if err := parser.Parse(configService.GetConfig().DemosDir, demoFile); err != nil {
 			log.Error(err)

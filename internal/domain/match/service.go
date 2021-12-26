@@ -75,7 +75,7 @@ func (s *Service) GetValveMatchesMissingDownloadUrl() ([]*Match, error) {
 	return s.repo.ListValveMatchesMissingDownloadUrl()
 }
 
-func (s *Service) SetDownloaded(m *Match, st Status, f string) error {
+func (s *Service) SetStatusAndFilename(m *Match, st Status, f string) error {
 	m.Status = st
 	m.Filename = f
 
@@ -83,7 +83,7 @@ func (s *Service) SetDownloaded(m *Match, st Status, f string) error {
 		return err
 	}
 
-	return s.repo.UpdateDownloaded(m)
+	return s.repo.UpdateStatusAndFilename(m)
 }
 
 func (s *Service) UpdateStatus(m *Match, st Status) error {
