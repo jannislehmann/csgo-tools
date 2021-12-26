@@ -201,13 +201,25 @@ func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 
 			// Victim may be null, if it was a bot.
 			if kill.Victim != nil {
-				m.getPlayer(kill.Victim).Deaths++
+				victim := m.getPlayer(kill.Victim)
+				victim.Deaths++
+
+				// First death of each round is an attempted opening duel.
+				if index == 0 {
+					victim.OpeningDuelAttemps++
+				}
 			}
 
 			// Killer may not be set if the player died e.g. through fall damage.
 			if kill.Killer != nil {
 				killer := m.getPlayer(kill.Killer)
 				killer.Kills++
+
+				// First kill of each round is an entry kill.
+				if index == 0 {
+					killer.EntryKills++
+				}
+
 				if kill.IsHeadshot {
 					killer.Headshots++
 				}

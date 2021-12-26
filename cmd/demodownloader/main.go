@@ -65,7 +65,7 @@ func main() {
 			}
 
 			// Mark as downloaded and save file name.
-			if err := matchService.SetDownloaded(m, status, filename); err != nil {
+			if err := matchService.SetStatusAndFilename(m, status, filename); err != nil {
 				log.Error(err)
 			}
 		}

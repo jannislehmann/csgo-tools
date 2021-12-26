@@ -48,7 +48,7 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 
 	playerStats := &PlayerGameStats{}
 
-	assists, kills, entryKills, headshots, deaths, mvps := 0, 0, 0, 0, 0, 0
+	assists, kills, entryKills, openingDuels, headshots, deaths, mvps := 0, 0, 0, 0, 0, 0, 0
 
 	for _, playerResult := range player.Results {
 		playerStats.Games++
@@ -58,6 +58,7 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 		assists += int(playerResult.Assists)
 		kills += int(playerResult.Kills)
 		entryKills += int(playerResult.EntryKills)
+		openingDuels += int(playerResult.OpeningDuelAttemps)
 		headshots += int(playerResult.Headshots)
 		deaths += int(playerResult.Deaths)
 		mvps += int(playerResult.MVPs)
@@ -73,6 +74,7 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 	playerStats.AssistsPerGame += assists / playerStats.Games
 	playerStats.KillsPerGame += kills / playerStats.Games
 	playerStats.EntryKillsPerGame += entryKills / playerStats.Games
+	playerStats.OpeningDuelAttempsPerGame += openingDuels / playerStats.Games
 	playerStats.HeadshotsPerGame += headshots / playerStats.Games
 	playerStats.DeathsPerGame += deaths / playerStats.Games
 	playerStats.MVPsPerGame += mvps / playerStats.Games

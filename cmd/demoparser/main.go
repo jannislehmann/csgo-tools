@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const ParserVersion = 5
+const ParserVersion = 6
 
 var configService *config.Service
 var matchService *match.Service
