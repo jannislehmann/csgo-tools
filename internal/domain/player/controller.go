@@ -60,6 +60,7 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 		playerStats.HeadshotsPerRound += int(playerResult.Headshots) / int(playerResult.MatchRounds)
 		playerStats.DeathsPerRound += int(playerResult.Deaths) / int(playerResult.MatchRounds)
 		playerStats.MVPsPerRound += int(playerResult.MVPs) / int(playerResult.MatchRounds)
+		playerStats.DamagePerRound += playerResult.DamageDealt / int(playerResult.MatchRounds)
 
 		playerStats.Won1v3 += int(playerResult.Won1v3)
 		playerStats.Won1v4 += int(playerResult.Won1v4)

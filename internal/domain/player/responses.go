@@ -22,6 +22,7 @@ type PlayerGameStats struct {
 	AssistsPerRound            int    `json:"assistsPerRound"`
 	DeathsPerRound             int    `json:"deathsPerRound"`
 	MVPsPerRound               int    `json:"mvpsPerRound"`
+	DamagePerRound             int    `json:"damagePerRound"`
 	Won1v3                     int    `json:"won1v3"`
 	Won1v4                     int    `json:"won1v4"`
 	Won1v5                     int    `json:"won1v5"`

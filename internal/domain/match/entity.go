@@ -191,6 +191,16 @@ func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 			winner.PistolRoundWins++
 		}
 
+		// Iterage damage and add that to the damage dealt by each player.
+		for _, damage := range round.Damage {
+			// Attacker might be null according to open issues of the demoparser.
+			attacker := damage.Attacker
+			if attacker != nil {
+				player := m.getPlayer(attacker)
+				player.DamageDealt += damage.HealthDamageTaken
+			}
+		}
+
 		playerKills := make(map[*player.PlayerResult]byte)
 
 		// Process in round function in order to calculate all round information like amount of kills / round.

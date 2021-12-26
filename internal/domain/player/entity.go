@@ -28,6 +28,7 @@ type PlayerResult struct {
 	Headshots          byte      `json:"headshots" bson:"headshots"`
 	Assists            byte      `json:"assists" bson:"assists"`
 	Deaths             byte      `json:"deaths" bson:"deaths"`
+	DamageDealt        int       `json:"damageDealt" bson:"damageDealt"`
 	MVPs               byte      `json:"mvps" bson:"mvps"`
 	Won1v3             byte      `json:"won1v3" bson:"won1v3"`
 	Won1v4             byte      `json:"won1v4" bson:"won1v4"`

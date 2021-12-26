@@ -139,6 +139,24 @@ func (s *Service) handleKill(e events.Kill) {
 	round.Kills = append(round.Kills, kill)
 }
 
+func (s *Service) handlePlayerHurt(e events.PlayerHurt) {
+	if s.parser.GameState().IsWarmupPeriod() || s.CurrentRound == 0 {
+		return
+	}
+
+	round := s.Match.Rounds[s.CurrentRound-1]
+	damage := &Damage{HealthDamageTaken: e.HealthDamageTaken}
+
+	if e.Attacker != nil {
+		attacker, err := s.getPlayer(e.Attacker)
+		if err == nil {
+			damage.Attacker = attacker
+		}
+	}
+
+	round.Damage = append(round.Damage, damage)
+}
+
 func (s *Service) handleRankUpdate(e events.RankUpdate) {
 	player, err := s.getPlayer(e.Player)
 	if err != nil {

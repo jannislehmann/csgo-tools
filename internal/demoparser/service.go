@@ -70,6 +70,7 @@ type Player struct {
 type Round struct {
 	Duration  time.Duration
 	Kills     []*Kill
+	Damage    []*Damage
 	Winner    *Team
 	WinReason events.RoundEndReason
 	MVP       *Player
@@ -89,6 +90,11 @@ type Kill struct {
 	IsNoScope       bool
 	IsThroughSmoke  bool
 	IsThroughWall   bool
+}
+
+type Damage struct {
+	Attacker          *Player
+	HealthDamageTaken int
 }
 
 // Parse takes a demo file and starts parsing by registering all required event handlers.
@@ -116,6 +122,7 @@ func (s *Service) Parse(dir string, demoFile *demo.Demo) error {
 	s.parser.RegisterEventHandler(s.handleMatchStart)
 	s.parser.RegisterEventHandler(s.handleGamePhaseChanged)
 	s.parser.RegisterEventHandler(s.handleKill)
+	s.parser.RegisterEventHandler(s.handlePlayerHurt)
 	s.parser.RegisterEventHandler(s.handleMVP)
 	s.parser.RegisterEventHandler(s.handleRoundStart)
 	s.parser.RegisterEventHandler(s.handleRoundEnd)
