@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const ParserVersion = 6
+const ParserVersion = 7
 
 var configService *config.Service
 var matchService *match.Service
@@ -128,6 +128,7 @@ func worker(matches <-chan *match.Match) {
 				}
 
 				playerResult.MatchID = m.ID
+				playerResult.MatchRounds = byte(len(m.Result.Rounds))
 				if err := playerService.AddResult(player, playerResult); err != nil {
 					log.Error(err)
 				}

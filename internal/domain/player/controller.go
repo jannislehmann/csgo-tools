@@ -48,20 +48,18 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 
 	playerStats := &PlayerGameStats{}
 
-	assists, kills, entryKills, openingDuels, headshots, deaths, mvps := 0, 0, 0, 0, 0, 0, 0
-
 	for _, playerResult := range player.Results {
 		playerStats.Games++
 		playerStats.SteamID = playerResult.SteamID
 		playerStats.Name = playerResult.Name
 
-		assists += int(playerResult.Assists)
-		kills += int(playerResult.Kills)
-		entryKills += int(playerResult.EntryKills)
-		openingDuels += int(playerResult.OpeningDuelAttemps)
-		headshots += int(playerResult.Headshots)
-		deaths += int(playerResult.Deaths)
-		mvps += int(playerResult.MVPs)
+		playerStats.AssistsPerRound += int(playerResult.Assists) / int(playerResult.MatchRounds)
+		playerStats.KillsPerRound += int(playerResult.Kills) / int(playerResult.MatchRounds)
+		playerStats.EntryKillsPerRound += int(playerResult.EntryKills) / int(playerResult.MatchRounds)
+		playerStats.OpeningDuelAttempsPerRound += int(playerResult.OpeningDuelAttemps) / int(playerResult.MatchRounds)
+		playerStats.HeadshotsPerRound += int(playerResult.Headshots) / int(playerResult.MatchRounds)
+		playerStats.DeathsPerRound += int(playerResult.Deaths) / int(playerResult.MatchRounds)
+		playerStats.MVPsPerRound += int(playerResult.MVPs) / int(playerResult.MatchRounds)
 
 		playerStats.Won1v3 += int(playerResult.Won1v3)
 		playerStats.Won1v4 += int(playerResult.Won1v4)
@@ -71,12 +69,5 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 		playerStats.RoundsWith5K += int(playerResult.RoundsWith5K)
 	}
 
-	playerStats.AssistsPerGame += assists / playerStats.Games
-	playerStats.KillsPerGame += kills / playerStats.Games
-	playerStats.EntryKillsPerGame += entryKills / playerStats.Games
-	playerStats.OpeningDuelAttempsPerGame += openingDuels / playerStats.Games
-	playerStats.HeadshotsPerGame += headshots / playerStats.Games
-	playerStats.DeathsPerGame += deaths / playerStats.Games
-	playerStats.MVPsPerGame += mvps / playerStats.Games
 	g.JSON(http.StatusOK, playerStats)
 }
