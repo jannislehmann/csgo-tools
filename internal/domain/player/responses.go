@@ -8,6 +8,8 @@ type PlayerListEntry struct {
 	ID    uint64 `json:"id"`
 	Name  string `json:"name"`
 	Games int    `json:"games"`
+	Wins  int    `json:"wins"`
+	Rank  int    `json:"rank"`
 }
 
 // PlayerGameStats describes average stats across all matches.

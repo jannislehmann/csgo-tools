@@ -25,10 +25,12 @@ func (c *Controller) GetPlayers(g *gin.Context) {
 		results := player.Results
 		lenResults := len(results)
 
-		lastPlayerName := results[lenResults-1]
+		lastPlayerName := results[lenResults-1].Name
+		lastWinCount := results[lenResults-1].WinCount
+		lastRank := results[lenResults-1].RankNew
 
 		playerList.Players[i] = &PlayerListEntry{
-			ID: player.ID, Games: lenResults, Name: lastPlayerName.Name,
+			ID: player.ID, Games: lenResults, Name: lastPlayerName, Wins: lastWinCount, Rank: lastRank,
 		}
 
 	}
