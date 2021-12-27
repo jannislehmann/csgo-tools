@@ -216,7 +216,7 @@ func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 
 				// First death of each round is an attempted opening duel.
 				if index == 0 {
-					victim.OpeningDuelAttemps++
+					victim.OpeningDuelAttempts++
 				}
 			}
 

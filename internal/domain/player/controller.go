@@ -56,7 +56,7 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 		playerStats.AssistsPerRound += int(playerResult.Assists) / int(playerResult.MatchRounds)
 		playerStats.KillsPerRound += int(playerResult.Kills) / int(playerResult.MatchRounds)
 		playerStats.EntryKillsPerRound += int(playerResult.EntryKills) / int(playerResult.MatchRounds)
-		playerStats.OpeningDuelAttempsPerRound += int(playerResult.OpeningDuelAttemps) / int(playerResult.MatchRounds)
+		playerStats.OpeningDuelAttempsPerRound += int(playerResult.OpeningDuelAttempts) / int(playerResult.MatchRounds)
 		playerStats.HeadshotsPerRound += int(playerResult.Headshots) / int(playerResult.MatchRounds)
 		playerStats.DeathsPerRound += int(playerResult.Deaths) / int(playerResult.MatchRounds)
 		playerStats.MVPsPerRound += int(playerResult.MVPs) / int(playerResult.MatchRounds)
