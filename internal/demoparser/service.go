@@ -138,7 +138,7 @@ func (s *Service) AddPlayer(player *common.Player) *Player {
 	teams := s.Match.Teams
 	teamPlayers := teams[teamID].Players
 
-	customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID], RankOld: -1, RankNew: -1, WinCount: -1}
+	customPlayer := &Player{SteamID: player.SteamID64, Name: player.Name, Team: teams[teamID], RankOld: -1, RankNew: -1}
 
 	teams[teamID].Players = append(teamPlayers, customPlayer)
 	s.Match.Players = append(s.Match.Players, customPlayer)
