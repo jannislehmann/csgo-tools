@@ -37,7 +37,7 @@ type PlayerResult struct {
 	RoundsWith4K        byte      `json:"roundsWith4k" bson:"4k"`
 	RoundsWith5K        byte      `json:"roundsWith5k" bson:"5k"`
 	// Rank
-	WinCount int `bson:"winCount"`
+	WinCount int `json:"wins" bson:"winCount"`
 	RankOld  int `json:"rankOld" bson:"rankOld"`
 	RankNew  int `json:"rankNew" bson:"rankNew"`
 }
