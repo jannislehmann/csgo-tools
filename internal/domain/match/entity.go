@@ -227,6 +227,7 @@ func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 
 				// First kill of each round is an entry kill.
 				if index == 0 {
+					killer.OpeningDuelAttempts++
 					killer.EntryKills++
 				}
 
