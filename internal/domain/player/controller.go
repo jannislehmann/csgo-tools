@@ -50,19 +50,25 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 
 	playerStats := &PlayerGameStats{}
 
+	// Keep track of the amount of rounds and all assists etc.
+	var matchRounds float32
+	assists, kills, entryKills, openingDuelAttempts, headshots, deaths, mvps, damageDealt := 0, 0, 0, 0, 0, 0, 0, 0
+
 	for _, playerResult := range player.Results {
 		playerStats.Games++
 		playerStats.SteamID = playerResult.SteamID
 		playerStats.Name = playerResult.Name
 
-		playerStats.AssistsPerRound += int(playerResult.Assists) / int(playerResult.MatchRounds)
-		playerStats.KillsPerRound += int(playerResult.Kills) / int(playerResult.MatchRounds)
-		playerStats.EntryKillsPerRound += int(playerResult.EntryKills) / int(playerResult.MatchRounds)
-		playerStats.OpeningDuelAttempsPerRound += int(playerResult.OpeningDuelAttempts) / int(playerResult.MatchRounds)
-		playerStats.HeadshotsPerRound += int(playerResult.Headshots) / int(playerResult.MatchRounds)
-		playerStats.DeathsPerRound += int(playerResult.Deaths) / int(playerResult.MatchRounds)
-		playerStats.MVPsPerRound += int(playerResult.MVPs) / int(playerResult.MatchRounds)
-		playerStats.DamagePerRound += playerResult.DamageDealt / int(playerResult.MatchRounds)
+		matchRounds += float32(playerResult.MatchRounds)
+
+		assists += int(playerResult.Assists)
+		kills += int(playerResult.Kills)
+		entryKills += int(playerResult.EntryKills)
+		openingDuelAttempts += int(playerResult.OpeningDuelAttempts)
+		headshots += int(playerResult.Headshots)
+		deaths += int(playerResult.Deaths)
+		mvps += int(playerResult.MVPs)
+		damageDealt += int(playerResult.DamageDealt)
 
 		playerStats.Won1v3 += int(playerResult.Won1v3)
 		playerStats.Won1v4 += int(playerResult.Won1v4)
@@ -71,6 +77,15 @@ func (c *Controller) GetPlayerAverageStats(g *gin.Context) {
 		playerStats.RoundsWith4K += int(playerResult.RoundsWith4K)
 		playerStats.RoundsWith5K += int(playerResult.RoundsWith5K)
 	}
+
+	playerStats.AssistsPerRound += float32(assists) / matchRounds
+	playerStats.KillsPerRound += float32(kills) / matchRounds
+	playerStats.EntryKillsPerRound += float32(entryKills) / matchRounds
+	playerStats.OpeningDuelAttempsPerRound += float32(openingDuelAttempts) / matchRounds
+	playerStats.HeadshotsPerRound += float32(headshots) / matchRounds
+	playerStats.DeathsPerRound += float32(deaths) / matchRounds
+	playerStats.MVPsPerRound += float32(mvps) / matchRounds
+	playerStats.DamagePerRound += float32(damageDealt) / matchRounds
 
 	g.JSON(http.StatusOK, playerStats)
 }
