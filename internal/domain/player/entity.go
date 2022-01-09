@@ -22,7 +22,7 @@ type PlayerResult struct {
 	MatchRounds         byte      `json:"matchRounds" bson:"matchRounds" validation:"required"`
 	SteamID             uint64    `json:"id" bson:"steamId" validation:"required"`
 	Name                string    `json:"name" bson:"name" validation:"required"`
-	Kills               byte      `json:"kills" bson:"kills"`
+	Kills               int8      `json:"kills" bson:"kills"`
 	EntryKills          byte      `json:"entryKills" bson:"entryKills"`
 	OpeningDuelAttempts byte      `json:"openingDuelAttempts" bson:"openingDuelAttempts"`
 	Headshots           byte      `json:"headshots" bson:"headshots"`

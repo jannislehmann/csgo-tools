@@ -209,42 +209,48 @@ func (m *MatchResult) processRounds(rounds []*demoparser.Round) {
 			killResult := CreateKillResult(kill)
 			roundResult.Kills[index] = killResult
 
-			// Victim may be null, if it was a bot.
-			if kill.Victim != nil {
-				victim := m.getPlayer(kill.Victim)
-				victim.Deaths++
+			if kill.Victim == kill.Killer {
+				player := m.getPlayer(kill.Victim)
+				player.Deaths++
+				player.Kills--
+			} else {
+				// Victim may be null, if it was a bot.
+				if kill.Victim != nil {
+					victim := m.getPlayer(kill.Victim)
+					victim.Deaths++
 
-				// First death of each round is an attempted opening duel.
-				if index == 0 {
-					victim.OpeningDuelAttempts++
-				}
-			}
-
-			// Killer may not be set if the player died e.g. through fall damage.
-			if kill.Killer != nil {
-				killer := m.getPlayer(kill.Killer)
-				killer.Kills++
-
-				// First kill of each round is an entry kill.
-				if index == 0 {
-					killer.OpeningDuelAttempts++
-					killer.EntryKills++
+					// First death of each round is an attempted opening duel.
+					if index == 0 {
+						victim.OpeningDuelAttempts++
+					}
 				}
 
-				if kill.IsHeadshot {
-					killer.Headshots++
+				// Killer may not be set if the player died e.g. through fall damage.
+				if kill.Killer != nil {
+					killer := m.getPlayer(kill.Killer)
+					killer.Kills++
+
+					// First kill of each round is an entry kill.
+					if index == 0 {
+						killer.OpeningDuelAttempts++
+						killer.EntryKills++
+					}
+
+					if kill.IsHeadshot {
+						killer.Headshots++
+					}
+
+					if _, found := playerKills[killer]; !found {
+						playerKills[killer] = 0
+					}
+					playerKills[killer]++
 				}
 
-				if _, found := playerKills[killer]; !found {
-					playerKills[killer] = 0
+				// Assister may not be set.
+				if kill.Assister != nil {
+					assister := m.getPlayer(kill.Assister)
+					assister.Assists++
 				}
-				playerKills[killer]++
-			}
-
-			// Assister may not be set.
-			if kill.Assister != nil {
-				assister := m.getPlayer(kill.Assister)
-				assister.Assists++
 			}
 		}
 
