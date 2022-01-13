@@ -127,7 +127,6 @@ func worker(matches <-chan *match.Match) {
 					continue
 				}
 
-				// TODO: Add team scores
 				playerResult.MatchID = m.ID
 				playerResult.MatchRounds = byte(len(m.Result.Rounds))
 				playerResult.ScoreOwnTeam = t.Wins
