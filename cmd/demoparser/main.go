@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const ParserVersion = 10
+const ParserVersion = 11
 
 var configService *config.Service
 var matchService *match.Service
@@ -127,8 +127,15 @@ func worker(matches <-chan *match.Match) {
 					continue
 				}
 
+				// TODO: Add team scores
 				playerResult.MatchID = m.ID
 				playerResult.MatchRounds = byte(len(m.Result.Rounds))
+				playerResult.ScoreOwnTeam = t.Wins
+
+				// This gets the team index in the array by turning the index around.
+				// There could be a smarter way, but this is a fast one.
+				enemyTeamId := (t.TeamID + 1) % 2
+				playerResult.ScoreEnemyTeam = m.Result.Teams[enemyTeamId].Wins
 				if err := playerService.AddResult(player, playerResult); err != nil {
 					log.Error(err)
 				}

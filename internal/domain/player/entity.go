@@ -20,6 +20,8 @@ type Player struct {
 type PlayerResult struct {
 	MatchID             entity.ID `json:"matchId" bson:"matchId" validation:"required"`
 	MatchRounds         byte      `json:"matchRounds" bson:"matchRounds" validation:"required"`
+	ScoreOwnTeam        byte      `json:"scoreOwnTeam" bson:"scoreOwnTeam"`
+	ScoreEnemyTeam      byte      `json:"scoreEnemyTeam" bson:"scoreEnemyTeam"`
 	SteamID             uint64    `json:"id" bson:"steamId" validation:"required"`
 	Name                string    `json:"name" bson:"name" validation:"required"`
 	Kills               int8      `json:"kills" bson:"kills"`
