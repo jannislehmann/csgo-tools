@@ -19,6 +19,8 @@ type Player struct {
 // PlayerResult holds different performance metrics from one game.
 type PlayerResult struct {
 	MatchID             entity.ID `json:"matchId" bson:"matchId" validation:"required"`
+	Time                time.Time `json:"time" bson:"time" validate:"required"`
+	Map                 string    `json:"map" bson:"map" validate:"required"`
 	MatchRounds         byte      `json:"matchRounds" bson:"matchRounds" validation:"required"`
 	ScoreOwnTeam        byte      `json:"scoreOwnTeam" bson:"scoreOwnTeam"`
 	ScoreEnemyTeam      byte      `json:"scoreEnemyTeam" bson:"scoreEnemyTeam"`
