@@ -129,7 +129,7 @@ func worker(matches <-chan *match.Match) {
 
 				playerResult.MatchID = m.ID
 				playerResult.Map = m.Result.Map
-				playerResult.Time = m.Time
+				playerResult.Time = m.Result.Time
 				playerResult.MatchRounds = byte(len(m.Result.Rounds))
 				playerResult.ScoreOwnTeam = t.Wins
 
