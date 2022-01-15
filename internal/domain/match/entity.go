@@ -129,7 +129,8 @@ func CreateResult(m *demoparser.MatchData) *MatchResult {
 
 		// Get starting team and append player.
 		team := result.Teams[demoparser.GetTeamIndex(p.Team.StartedAs, false)]
-		team.Players = append(team.Players, &player.PlayerResult{SteamID: p.SteamID, Name: p.Name, WinCount: p.WinCount, RankOld: p.RankOld, RankNew: p.RankNew})
+
+		team.Players = append(team.Players, &player.PlayerResult{SteamID: p.SteamID, MatchID: m.ID, Map: m.Map, Time: m.Time, Name: p.Name, WinCount: p.WinCount, RankOld: p.RankOld, RankNew: p.RankNew})
 	}
 
 	result.processRounds(m.Rounds)
