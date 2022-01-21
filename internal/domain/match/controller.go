@@ -72,5 +72,6 @@ func getClanPlayersIds() map[uint64]bool {
 		76561198070498642: true,
 		76561198075069967: true,
 		76561198053633135: true,
+		76561198031907850: true,
 	}
 }
