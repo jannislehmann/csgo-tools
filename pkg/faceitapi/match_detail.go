@@ -24,6 +24,11 @@ func GetMatchDetails(faceitAPIKey string, matchId string) (*MatchDetailResponse,
 		return nil, err
 	}
 
+	if r.StatusCode == http.StatusTooManyRequests || r.StatusCode == http.StatusServiceUnavailable {
+		r.Body.Close()
+		return nil, &FaceitApiConnectionIssues{}
+	}
+
 	if r.StatusCode == http.StatusUnauthorized || r.StatusCode == http.StatusForbidden {
 		r.Body.Close()
 		return nil, &InvalidFaceitApiCredentials{}
