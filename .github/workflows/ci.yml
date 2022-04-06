@@ -72,6 +72,16 @@ jobs:
           asset_path: ./bin/valveapiclient
           asset_name: valveapiclient-${{ github.ref }}
           asset_content_type: application/vnd.github.VERSION.raw
+      - name: Upload FaceitAPIClient Release Asset
+        id: upload-faceitapiclient-release-asset  
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bin/faceitapiclient
+          asset_name: faceitapiclient-${{ github.ref }}
+          asset_content_type: application/vnd.github.VERSION.raw
       - name: Upload Demodownloader Release Asset
         id: upload-demodownloader-release-asset  
         uses: actions/upload-release-asset@v1

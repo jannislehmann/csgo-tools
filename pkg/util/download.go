@@ -40,7 +40,7 @@ func IsDemoNotFoundError(err error) bool {
 func DownloadDemo(url string, demoDir string, lastModified time.Time) error {
 	// Validate the url
 	reValve := regexp.MustCompile(`^http:\/\/replay[\d]{3}\.valve\.net\/730\/[\d]{21}_([\d]*)\.dem\.bz2$`)
-	reFaceit := regexp.MustCompile(`^https:\/\/demos-([\w]*)-([\w]*)\.faceit-cdn\.net\/csgo\/\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b\.dem\.gz$`)
+	reFaceit := regexp.MustCompile(`^https:\/\/demos-([\w]*)-([\w]*)\.faceit-cdn\.net\/csgo\/[\d]{1}-\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b-[\d]{1}-[\d]{1}\.dem\.gz$`)
 
 	if !reValve.MatchString(url) && !reFaceit.MatchString(url) {
 		return ErrInvalidDownloadURL

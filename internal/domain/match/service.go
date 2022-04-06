@@ -63,7 +63,7 @@ func (s *Service) GetMatchByValveOutcomeId(id uint64) (*Match, error) {
 	return s.repo.FindByValveOutcomeId(id)
 }
 
-func (s *Service) GetMatchByFaceitId(id entity.ID) (*Match, error) {
+func (s *Service) GetMatchByFaceitId(id string) (*Match, error) {
 	return s.repo.FindByFaceitId(id)
 }
 
@@ -94,6 +94,19 @@ func (s *Service) UpdateStatus(m *Match, st Status) error {
 	}
 
 	return s.repo.UpdateStatus(m)
+}
+
+func (s *Service) CreateDownloadableMatchFromFaceitId(faceitMatchId string, downloadUrl string) (*Match, error) {
+	dbMatch, err := s.GetMatchByFaceitId(faceitMatchId)
+	if err != nil && !errors.Is(err, entity.ErrNotFound) || dbMatch != nil {
+		return dbMatch, err
+	}
+
+	m, _ := NewMatch(Faceit)
+	m.FaceitMatchId = faceitMatchId
+	m.DownloadURL = downloadUrl
+	m.Status = Downloadable
+	return m, s.repo.Create(m)
 }
 
 func (s *Service) CreateMatchFromSharecode(sc *share_code.ShareCodeData) (*Match, error) {

@@ -43,6 +43,7 @@ type Config struct {
 	DemosDir string          `mapstructure:"demosDir"`
 	Auth     *AuthConfig     `mapstructure:"auth"`
 	Steam    *SteamConfig    `mapstructure:"steam"`
+	Faceit   *FaceitConfig   `mapstructure:"faceit"`
 	Database *DatabaseConfig `mapstructure:"database"`
 	Debug    string          `mapstructure:"debug"`
 	Parser   *ParserConfig   `mapstructure:"parser"`
@@ -60,6 +61,11 @@ type SteamConfig struct {
 	Username        string `mapstructure:"username"`
 	Password        string `mapstructure:"password"`
 	TwoFactorSecret string `mapstructure:"twoFactorSecret"`
+}
+
+// FaceitConfig contains the faceit api key.
+type FaceitConfig struct {
+	FaceitAPIKey string `mapstructure:"apiKey"`
 }
 
 // DatabaseConfig holds database connection information.

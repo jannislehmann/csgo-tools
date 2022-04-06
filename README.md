@@ -13,6 +13,10 @@ The toolset currently features the following tools. All tools share one MongoDB 
 
 The auth service enables a user to sign in using his / her own Steam account. The generated token can be used with other services at a later point.
 
+### Faceit API client
+
+The API client consumes Faceit's API to get the latest matches and prepares these to be downloaded.
+
 ### ValveAPI client
 
 The API client consumes Valve's game history API and saves the game share codes in the database.
@@ -78,6 +82,12 @@ You can also use ENV vars to override single or set all configuration variables.
 | `username` |   `user`   |  Steam username |
 | `password` |   `totally_secret`   |  Steam password |
 | `twoFactorSecret` |   `aGV5IQ==`   | Base64 encoded two factor secret. Can be generated using e.g. the [Steam Desktop Authenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator) |
+
+### Faceit
+
+| Key   |      Value      |  Explanation |
+|----------|-------------:|------:|
+| `apiKey` |   `12345`   | The Faceit API key. Can be generate [here](https://developers.faceit.com) |
 
 ### Database
 

@@ -72,7 +72,7 @@ func (r *RepositoryMongo) FindByFilename(filename string) (*Match, error) {
 	return m, handleError(err)
 }
 
-func (r *RepositoryMongo) FindByFaceitId(id entity.ID) (*Match, error) {
+func (r *RepositoryMongo) FindByFaceitId(id string) (*Match, error) {
 	filterConfig := bson.M{"faceitMatchId": id}
 	m, err := r.filterOne(filterConfig)
 	return m, handleError(err)

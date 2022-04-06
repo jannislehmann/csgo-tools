@@ -11,6 +11,7 @@ type Repository interface {
 
 	Find(entity.ID) (*User, error)
 	FindUsersContainingAuthenticationCode() ([]*User, error)
+	FindUsersContainingFaceitId() ([]*User, error)
 	FindBySteamId(uint64) (*User, error)
 	FindByFaceitId(entity.ID) (*User, error)
 
@@ -32,6 +33,7 @@ type UseCase interface {
 	GetUserBySteamId(uint64) (*User, error)
 	GetUserByFaceitId(entity.ID) (*User, error)
 	GetUsersWithAuthenticationCode() ([]*User, error)
+	GetUsersWithFaceitId() ([]*User, error)
 
 	AddSteamMatchHistoryAuthenticationCode(user *User, authCode string, sc string) error
 	UpdateSteamAPIUsage(*User, bool) error

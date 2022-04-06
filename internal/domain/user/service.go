@@ -40,6 +40,10 @@ func (s *Service) GetUsersWithAuthenticationCode() ([]*User, error) {
 	return s.repo.FindUsersContainingAuthenticationCode()
 }
 
+func (s *Service) GetUsersWithFaceitId() ([]*User, error) {
+	return s.repo.FindUsersContainingFaceitId()
+}
+
 func (s *Service) CreateUserUsingSteam(id uint64, nickname string) (*User, error) {
 	u, err := NewUserUsingSteam(id, nickname)
 	if err != nil {

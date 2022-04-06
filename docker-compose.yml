@@ -21,6 +21,16 @@ services:
     volumes: 
       - ./configs:/app/configs
 
+  faceitapiclient:
+    image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
+    command: "./faceitapiclient"
+    container_name: faceitapiclient
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes: 
+      - ./configs:/app/configs
+
   demodownloader:
     image: ghcr.io/cludch/csgo-tools/csgo-tools:latest
     command: "./demodownloader"

@@ -80,6 +80,14 @@ func (r *RepositoryMongo) FindUsersContainingAuthenticationCode() ([]*User, erro
 	return u, handleError(err)
 }
 
+func (r *RepositoryMongo) FindUsersContainingFaceitId() ([]*User, error) {
+	filterConfig := bson.D{primitive.E{Key: "faceit.id", Value: bson.D{
+		primitive.E{Key: "$exists", Value: true},
+	}}}
+	u, err := r.filter(filterConfig)
+	return u, handleError(err)
+}
+
 func (r *RepositoryMongo) List() ([]*User, error) {
 	filterConfig := bson.M{}
 	u, err := r.filter(filterConfig)

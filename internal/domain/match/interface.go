@@ -12,7 +12,7 @@ type Repository interface {
 
 	Find(entity.ID) (*Match, error)
 	FindByFilename(filename string) (*Match, error)
-	FindByFaceitId(entity.ID) (*Match, error)
+	FindByFaceitId(string) (*Match, error)
 	FindByValveId(uint64) (*Match, error)
 	FindByValveOutcomeId(uint64) (*Match, error)
 
@@ -33,6 +33,7 @@ type Repository interface {
 type UseCase interface {
 	CreateMatchFromManualUpload(filename string, matchTime time.Time) (*Match, error)
 	CreateMatchFromSharecode(*share_code.ShareCodeData) (*Match, error)
+	CreateDownloadableMatchFromFaceitId(string, string) (*Match, error)
 
 	GetAll() ([]*Match, error)
 	GetAllParsed() ([]*Match, error)
@@ -40,7 +41,7 @@ type UseCase interface {
 	GetMatchByFilename(filename string) (*Match, error)
 	GetMatchByValveId(uint64) (*Match, error)
 	GetMatchByValveOutcomeId(uint64) (*Match, error)
-	GetMatchByFaceitId(entity.ID) (*Match, error)
+	GetMatchByFaceitId(string) (*Match, error)
 	GetDownloadableMatches() ([]*Match, error)
 	GetValveMatchesMissingDownloadUrl() ([]*Match, error)
 	GetParseableMatches(parserVersion byte) ([]*Match, error)
