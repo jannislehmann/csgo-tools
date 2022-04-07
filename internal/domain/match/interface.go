@@ -33,7 +33,7 @@ type Repository interface {
 type UseCase interface {
 	CreateMatchFromManualUpload(filename string, matchTime time.Time) (*Match, error)
 	CreateMatchFromSharecode(*share_code.ShareCodeData) (*Match, error)
-	CreateDownloadableMatchFromFaceitId(string, string) (*Match, error)
+	CreateDownloadableMatchFromFaceitId(string, string, time.Time) (*Match, error)
 
 	GetAll() ([]*Match, error)
 	GetAllParsed() ([]*Match, error)

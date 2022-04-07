@@ -96,7 +96,7 @@ func (s *Service) UpdateStatus(m *Match, st Status) error {
 	return s.repo.UpdateStatus(m)
 }
 
-func (s *Service) CreateDownloadableMatchFromFaceitId(faceitMatchId string, downloadUrl string) (*Match, error) {
+func (s *Service) CreateDownloadableMatchFromFaceitId(faceitMatchId string, downloadUrl string, startTime time.Time) (*Match, error) {
 	dbMatch, err := s.GetMatchByFaceitId(faceitMatchId)
 	if err != nil && !errors.Is(err, entity.ErrNotFound) || dbMatch != nil {
 		return dbMatch, err
@@ -106,6 +106,7 @@ func (s *Service) CreateDownloadableMatchFromFaceitId(faceitMatchId string, down
 	m.FaceitMatchId = faceitMatchId
 	m.DownloadURL = downloadUrl
 	m.Status = Downloadable
+	m.Time = startTime
 	return m, s.repo.Create(m)
 }
 

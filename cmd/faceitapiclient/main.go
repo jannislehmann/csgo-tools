@@ -69,7 +69,8 @@ func main() {
 				}
 
 				downloadUrl := matchDetails.DemoUrl[0]
-				if _, err = matchService.CreateDownloadableMatchFromFaceitId(matchId, downloadUrl); err != nil {
+				startTime := time.Unix(matchDetails.StartTime, 0)
+				if _, err = matchService.CreateDownloadableMatchFromFaceitId(matchId, downloadUrl, startTime); err != nil {
 					const msg = "unable to create match downloadable faceit match for id %s and url %s: %s"
 					log.Errorf(msg, matchId, downloadUrl, err)
 					continue

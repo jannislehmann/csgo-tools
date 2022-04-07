@@ -8,7 +8,8 @@ import (
 
 // MatchResponse contains information about the latest match.
 type MatchDetailResponse struct {
-	DemoUrl []string `json:"demo_url"`
+	DemoUrl   []string `json:"demo_url"`
+	StartTime int64    `json:"started_at"`
 }
 
 // GetPlayerMatchHistory returns the match history for a given player.
