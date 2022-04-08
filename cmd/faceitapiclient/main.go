@@ -64,7 +64,7 @@ func main() {
 					log.Error(err)
 				}
 
-				if matchDetails == nil {
+				if matchDetails == nil || matchDetails.Status != "FINISHED" {
 					continue
 				}
 

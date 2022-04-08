@@ -10,6 +10,7 @@ import (
 type MatchDetailResponse struct {
 	DemoUrl   []string `json:"demo_url"`
 	StartTime int64    `json:"started_at"`
+	Status    string   `json:"status"`
 }
 
 // GetPlayerMatchHistory returns the match history for a given player.
