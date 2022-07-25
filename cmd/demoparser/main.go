@@ -35,6 +35,8 @@ func setup() {
 	if configService.GetConfig().Discord.Enabled {
 		log.Info("discord bot enabled")
 		discordService = discord_client.NewService(configService.GetConfig().Discord.DiscordAPIKey)
+	} else {
+		log.Info("discord bot disabled")
 	}
 
 	log.SetFormatter(&log.TextFormatter{

@@ -16,20 +16,22 @@ func NewService(apiKey string) *Service {
 }
 
 func (s *Service) connect(apiKey string) {
-	dg, err := discordgo.New("Bot " + apiKey)
-	if err != nil {
+
+	if dg, err := discordgo.New("Bot " + apiKey); err != nil {
 		log.Warn("discord: error creating Discord session", err)
 		return
+	} else {
+		s.dg = dg
 	}
-
-	s.dg = dg
 
 	log.Println("discord: bot is now running.")
 }
 
-func (s *Service) SendMessage(message, channelId string) {
-	if _, err := s.dg.ChannelMessageSend(channelId, message); err != nil {
+func (s *Service) SendMessage(message, channelID string) {
+	if _, err := s.dg.ChannelMessageSend(channelID, message); err != nil {
 		log.Warn("discord: an error occurred when sending: ", err)
+	} else {
+		log.Debugf("discord: send message: %s", message)
 	}
 }
 
