@@ -44,6 +44,7 @@ type Config struct {
 	Auth     *AuthConfig     `mapstructure:"auth"`
 	Steam    *SteamConfig    `mapstructure:"steam"`
 	Faceit   *FaceitConfig   `mapstructure:"faceit"`
+	Discord  *DiscordConfig  `mapstructure:"discord"`
 	Database *DatabaseConfig `mapstructure:"database"`
 	Debug    string          `mapstructure:"debug"`
 	Parser   *ParserConfig   `mapstructure:"parser"`
@@ -66,6 +67,13 @@ type SteamConfig struct {
 // FaceitConfig contains the faceit api key.
 type FaceitConfig struct {
 	FaceitAPIKey string `mapstructure:"apiKey"`
+}
+
+// DiscordConfig holds the configuration about the discord bot to be used when posting match results.
+type DiscordConfig struct {
+	Enabled       bool   `mapstructure:"enabled"`
+	DiscordAPIKey string `mapstructure:"apiKey"`
+	ChannelID     string `mapstructure:"channelId"`
 }
 
 // DatabaseConfig holds database connection information.

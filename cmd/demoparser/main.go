@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/Cludch/csgo-tools/internal/config"
 	"github.com/Cludch/csgo-tools/internal/demoparser"
+	"github.com/Cludch/csgo-tools/internal/discord_client"
 	"github.com/Cludch/csgo-tools/internal/domain/entity"
 	"github.com/Cludch/csgo-tools/internal/domain/match"
 	"github.com/Cludch/csgo-tools/internal/domain/player"
@@ -21,6 +23,7 @@ const ParserVersion = 15
 var configService *config.Service
 var matchService *match.Service
 var playerService *player.Service
+var discordService *discord_client.Service
 
 // Sets up the global variables (config, db) and the logger.
 func setup() {
@@ -28,6 +31,10 @@ func setup() {
 	db := entity.NewService(configService)
 	matchService = match.NewService(match.NewRepositoryMongo(db))
 	playerService = player.NewService(player.NewRepositoryMongo(db))
+
+	if configService.GetConfig().Discord.Enabled {
+		discordService = discord_client.NewService(configService.GetConfig().Discord.DiscordAPIKey)
+	}
 
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
@@ -112,6 +119,8 @@ func worker(matches <-chan *match.Match) {
 			continue
 		}
 
+		firstTimeParsing := m.Status != match.Parsed
+
 		result := match.CreateResult(parser.Match)
 		if err := matchService.UpdateResult(m, result, ParserVersion); err != nil {
 			log.Error(err)
@@ -142,5 +151,13 @@ func worker(matches <-chan *match.Match) {
 
 		const msg = "demoparser: finished parsing %s"
 		log.Infof(msg, filename)
+
+		if configService.GetConfig().Discord.Enabled && firstTimeParsing {
+			publishGameResultToDiscord(result)
+		}
 	}
+}
+
+func publishGameResultToDiscord(result *match.MatchResult) {
+	discordService.SendMessage(fmt.Sprintf("New match result: %d - %d", result.Teams[0].Wins, result.Teams[1].Wins), configService.GetConfig().Discord.ChannelID)
 }

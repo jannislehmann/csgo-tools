@@ -43,6 +43,8 @@ The demo parser parses the previously downloaded demo files and calculates the f
 When a new demoparser version gets released, the tool will automatically reparse demos, which were parsed with
 an older version. Therefore, new statistiscs will also be added for older demos. This, however, requires the demos to be permanently persisted.
 
+After a demo has been parsed, the result will be posted to a configured Discord channel.
+
 ## REST API
 
 The REST api serves basic match and player stats via the following routes.
@@ -88,6 +90,14 @@ You can also use ENV vars to override single or set all configuration variables.
 | Key   |      Value      |  Explanation |
 |----------|-------------:|------:|
 | `apiKey` |   `12345`   | The Faceit API key. Can be generate [here](https://developers.faceit.com) |
+
+### Discord
+
+| Key   |      Value      |  Explanation |
+|----------|-------------:|------:|
+| `enabled` |   `true`   | Whether the Discord bot should be used. |
+| `apiKey` |   `12345`   | The Discord Bot API key. |
+| `channelId` |   `12345`   | The channel id of the channel to which the results shall be send to. |
 
 ### Database
 
