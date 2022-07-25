@@ -24,7 +24,7 @@ func (s *Service) connect(apiKey string) {
 
 	s.dg = dg
 
-	log.Println("discord: Bot is now running.")
+	log.Println("discord: bot is now running.")
 }
 
 func (s *Service) SendMessage(message, channelId string) {

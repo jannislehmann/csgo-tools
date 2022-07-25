@@ -9,6 +9,7 @@
         "apiKey": "private"
     },
     "discord": {
+        "enabled": true,
         "apiKey": "",
         "channelId": "
     }

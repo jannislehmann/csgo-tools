@@ -71,7 +71,7 @@ type FaceitConfig struct {
 
 // DiscordConfig holds the configuration about the discord bot to be used when posting match results.
 type DiscordConfig struct {
-	Enabled       bool   `mapstructure:"enabled"`
+	Enabled       bool
 	DiscordAPIKey string `mapstructure:"apiKey"`
 	ChannelID     string `mapstructure:"channelId"`
 }

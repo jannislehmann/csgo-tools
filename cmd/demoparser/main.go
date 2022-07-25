@@ -33,6 +33,7 @@ func setup() {
 	playerService = player.NewService(player.NewRepositoryMongo(db))
 
 	if configService.GetConfig().Discord.Enabled {
+		log.Info("discord bot enabled")
 		discordService = discord_client.NewService(configService.GetConfig().Discord.DiscordAPIKey)
 	}
 
