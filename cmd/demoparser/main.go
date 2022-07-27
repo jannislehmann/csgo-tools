@@ -162,12 +162,13 @@ func worker(matches <-chan *match.Match) {
 }
 
 func publishGameResultToDiscord(result *match.MatchResult) {
-	message := fmt.Sprintf("New match result on map **%s**: *%d - %d*\n", result.Map, result.Teams[0].Wins, result.Teams[1].Wins)
+	message := fmt.Sprintf("New match result: \nMap **%s**: *%d - %d*\n", result.Map, result.Teams[0].Wins, result.Teams[1].Wins)
 	for _, t := range result.Teams {
 		message += fmt.Sprintf("Team %d with **%d** wins\n", t.TeamID, t.Wins)
 		for _, p := range t.Players {
-			message += fmt.Sprintf("Player *%s*: **%d-%d**\n", p.Name, p.Kills, p.Deaths)
+			message += fmt.Sprintf("Player `%s`: *%d-%d*\n", p.Name, p.Kills, p.Deaths)
 		}
+		message += "\n"
 	}
 
 	discordService.SendMessage(message, configService.GetConfig().Discord.ChannelID)
