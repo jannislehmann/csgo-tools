@@ -75,7 +75,7 @@ func main() {
 	}
 
 	// Create a loop that checks for unparsed demos.
-	t := time.NewTicker(time.Hour)
+	t := time.NewTicker(time.Minute)
 	for {
 		// Get non-parsed matches from the db.
 		nonParsedMatches, err := matchService.GetParseableMatches(ParserVersion)
