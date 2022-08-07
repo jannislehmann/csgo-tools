@@ -64,7 +64,7 @@ func (s *Service) HandleGCReady(e *GCReadyEvent) {
 				ch <- true
 			case <-time.After(15 * time.Second):
 				const msg = "gamecoordinator: failed to receive response for %s"
-				log.Debugf(msg, sc.Encoded)
+				log.Fatalf(msg, sc.Encoded)
 				ch <- false
 			}
 

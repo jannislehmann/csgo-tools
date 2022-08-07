@@ -64,6 +64,8 @@ func (s *Service) HandleGCPacket(packet *gamecoordinator.GCPacket) {
 
 	if handler, ok := s.gc.handlers[packet.MsgType]; ok {
 		handler(packet)
+	} else {
+		log.Infof("received unhandled package of type %d", packet.MsgType)
 	}
 }
 
